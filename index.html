@@ -3,401 +3,769 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Software Tycoon</title>
-    <meta name="description" content="Build your software empire from garage to global tech giant">
+    <meta name="description" content="Software Tycoon - Build your software empire from garage startup to global tech giant">
     <meta name="theme-color" content="#1a1a2e">
+    <title>Software Tycoon v2.1.0 | Build Your Software Empire</title>
     
-    <!-- PWA Settings -->
+    <!-- PWA Configuration -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Software Tycoon">
     
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css">
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => console.log('✅ SW registered:', registration.scope))
+                    .catch(error => console.log('❌ SW registration failed:', error));
+            });
+        }
+    </script>
 </head>
 <body>
-    <!-- Loading Screen -->
+    <!-- 🚀 Loading Screen -->
     <div id="loading-screen" class="loading-screen">
-        <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Software Tycoon" class="loading-logo">
-        <div class="loading-text">Loading Software Tycoon...</div>
-        <div class="loading-bar">
-            <div class="loading-progress"></div>
+        <div class="loading-container">
+            <div class="loading-logo">
+                <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Software Tycoon Logo">
+            </div>
+            <h1 class="loading-title">Software Tycoon</h1>
+            <p class="loading-subtitle">Build Your Software Empire</p>
+            <div class="loading-progress-container">
+                <div class="loading-progress"></div>
+            </div>
+            <div class="loading-status">Initializing...</div>
+            <div class="version-info">
+                <span>Version 2.1.0</span>
+                <span>•</span>
+                <span>AL Software Studio</span>
+                <span>•</span>
+                <span>2025</span>
+            </div>
         </div>
     </div>
 
-    <!-- Main Game Container -->
+    <!-- 🏢 Company Creation Wizard -->
+    <div id="company-creation" class="company-creation hidden">
+        <div class="creation-container">
+            <!-- Progress Indicator -->
+            <div class="creation-progress">
+                <div class="progress-steps">
+                    <div class="step-indicator active" data-step="1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Company Info</span>
+                    </div>
+                    <div class="step-indicator" data-step="2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Logo & Branding</span>
+                    </div>
+                    <div class="step-indicator" data-step="3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Specialization</span>
+                    </div>
+                    <div class="step-indicator" data-step="4">
+                        <span class="step-number">4</span>
+                        <span class="step-label">Location</span>
+                    </div>
+                    <div class="step-indicator" data-step="5">
+                        <span class="step-number">5</span>
+                        <span class="step-label">Launch</span>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 20%"></div>
+                </div>
+            </div>
+
+            <!-- Step 1: Company Information -->
+            <div id="step-1" class="creation-step active">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Create Your Software Company</h2>
+                        <p>Every great tech empire starts with a vision and a name.</p>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label for="founder-name">Founder Name</label>
+                            <input type="text" id="founder-name" placeholder="Enter your name" maxlength="50">
+                            <small>This is how you'll be known in the industry</small>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label for="company-name">Company Name</label>
+                            <input type="text" id="company-name" placeholder="Your Company Name" maxlength="50">
+                            <small>Choose a name that will dominate the tech world</small>
+                        </div>
+                        
+                        <div class="input-group full-width">
+                            <label for="company-vision">Company Vision (Optional)</label>
+                            <textarea id="company-vision" placeholder="What's your company's mission?" maxlength="200" rows="3"></textarea>
+                            <small>Describe your company's goals and values</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Logo & Branding -->
+            <div id="step-2" class="creation-step">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Design Your Brand Identity</h2>
+                        <p>Choose a logo that represents your company's innovation.</p>
+                    </div>
+                    
+                    <div class="logo-selection">
+                        <div class="logo-options">
+                            <!-- Custom Upload -->
+                            <div class="upload-section">
+                                <h3>Upload Custom Logo</h3>
+                                <div class="file-upload" id="logo-upload">
+                                    <input type="file" id="logo-file" accept="image/*" hidden>
+                                    <div class="upload-area">
+                                        <div class="upload-icon">📁</div>
+                                        <div class="upload-text">
+                                            <strong>Click to upload</strong><br>
+                                            PNG, JPG, SVG (Max 2MB)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Preset Logos -->
+                            <div class="preset-section">
+                                <h3>Choose Preset Logo</h3>
+                                <div class="preset-grid">
+                                    <button class="preset-logo" data-logo="🚀">🚀</button>
+                                    <button class="preset-logo" data-logo="⚡">⚡</button>
+                                    <button class="preset-logo" data-logo="🔥">🔥</button>
+                                    <button class="preset-logo" data-logo="💎">💎</button>
+                                    <button class="preset-logo" data-logo="🌟">🌟</button>
+                                    <button class="preset-logo" data-logo="🎯">🎯</button>
+                                    <button class="preset-logo" data-logo="🏆">🏆</button>
+                                    <button class="preset-logo" data-logo="🔧">🔧</button>
+                                    <button class="preset-logo" data-logo="💻">💻</button>
+                                    <button class="preset-logo" data-logo="🎮">🎮</button>
+                                    <button class="preset-logo" data-logo="🌐">🌐</button>
+                                    <button class="preset-logo" data-logo="🛡️">🛡️</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Logo Preview -->
+                        <div class="logo-preview">
+                            <h3>Preview</h3>
+                            <div class="preview-container">
+                                <div class="logo-display" id="logo-preview">🚀</div>
+                                <div class="company-preview">
+                                    <div class="company-name-preview" id="company-name-preview">Your Company</div>
+                                    <div class="founder-preview" id="founder-preview">Founder & CEO</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Specialization -->
+            <div id="step-3" class="creation-step">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Choose Your Specialization</h2>
+                        <p>What type of software will your company focus on initially?</p>
+                    </div>
+                    
+                    <div class="specialization-grid">
+                        <div class="spec-card" data-spec="mobile">
+                            <div class="spec-icon">📱</div>
+                            <h3>Mobile Apps</h3>
+                            <p>Quick development cycles, broad market appeal, high download potential</p>
+                            <div class="spec-benefits">
+                                <span class="benefit">+25% Mobile App Revenue</span>
+                                <span class="benefit">Faster Time to Market</span>
+                                <span class="benefit">Lower Initial Investment</span>
+                            </div>
+                        </div>
+                        
+                        <div class="spec-card" data-spec="gaming">
+                            <div class="spec-icon">🎮</div>
+                            <h3>Game Development</h3>
+                            <p>High-risk, high-reward entertainment software with viral potential</p>
+                            <div class="spec-benefits">
+                                <span class="benefit">+30% Game Revenue</span>
+                                <span class="benefit">Viral Marketing Bonus</span>
+                                <span class="benefit">Premium Pricing</span>
+                            </div>
+                        </div>
+                        
+                        <div class="spec-card" data-spec="enterprise">
+                            <div class="spec-icon">💼</div>
+                            <h3>Enterprise Software</h3>
+                            <p>B2B solutions with steady recurring revenue and long-term contracts</p>
+                            <div class="spec-benefits">
+                                <span class="benefit">+20% Enterprise Revenue</span>
+                                <span class="benefit">Recurring Subscriptions</span>
+                                <span class="benefit">Stable Customer Base</span>
+                            </div>
+                        </div>
+                        
+                        <div class="spec-card" data-spec="ai">
+                            <div class="spec-icon">🤖</div>
+                            <h3>AI & Machine Learning</h3>
+                            <p>Cutting-edge technology with massive future potential</p>
+                            <div class="spec-benefits">
+                                <span class="benefit">+40% AI Revenue</span>
+                                <span class="benefit">Research Advantages</span>
+                                <span class="benefit">Premium Valuation</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Location -->
+            <div id="step-4" class="creation-step">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Choose Your Starting Location</h2>
+                        <p>Location affects your starting capital, talent pool, and market access.</p>
+                    </div>
+                    
+                    <div class="location-grid">
+                        <div class="location-card" data-location="silicon-valley">
+                            <div class="location-flag">🇺🇸</div>
+                            <h3>Silicon Valley</h3>
+                            <p>The heart of tech innovation with access to top talent and investors</p>
+                            <div class="location-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Starting Capital</span>
+                                    <span class="stat-value">$15,000</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Market Access</span>
+                                    <span class="stat-value">Global</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Talent Pool</span>
+                                    <span class="stat-value">Excellent</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Operating Costs</span>
+                                    <span class="stat-value">Very High</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card" data-location="austin">
+                            <div class="location-flag">🇺🇸</div>
+                            <h3>Austin, Texas</h3>
+                            <p>Growing tech hub with lower costs and strong startup ecosystem</p>
+                            <div class="location-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Starting Capital</span>
+                                    <span class="stat-value">$10,000</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Market Access</span>
+                                    <span class="stat-value">Regional</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Talent Pool</span>
+                                    <span class="stat-value">Good</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Operating Costs</span>
+                                    <span class="stat-value">Moderate</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card" data-location="bangalore">
+                            <div class="location-flag">🇮🇳</div>
+                            <h3>Bangalore, India</h3>
+                            <p>India's Silicon Valley with cost advantages and skilled developers</p>
+                            <div class="location-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Starting Capital</span>
+                                    <span class="stat-value">$8,000</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Market Access</span>
+                                    <span class="stat-value">Emerging</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Talent Pool</span>
+                                    <span class="stat-value">Excellent</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Operating Costs</span>
+                                    <span class="stat-value">Low</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="location-card" data-location="hometown">
+                            <div class="location-flag">🏠</div>
+                            <h3>Your Hometown</h3>
+                            <p>Start local with limited resources but familiar territory</p>
+                            <div class="location-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Starting Capital</span>
+                                    <span class="stat-value">$5,000</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Market Access</span>
+                                    <span class="stat-value">Local</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Talent Pool</span>
+                                    <span class="stat-value">Limited</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Operating Costs</span>
+                                    <span class="stat-value">Very Low</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Launch -->
+            <div id="step-5" class="creation-step">
+                <div class="step-content">
+                    <div class="step-header">
+                        <h2>Ready to Launch Your Empire?</h2>
+                        <p>Review your company details and begin your journey to tech domination.</p>
+                    </div>
+                    
+                    <div class="launch-summary">
+                        <div class="company-card">
+                            <div class="company-header">
+                                <div class="company-logo-display" id="final-logo-preview">🚀</div>
+                                <div class="company-details">
+                                    <h3 id="final-company-name">Your Company</h3>
+                                    <p id="final-founder-name">Founder & CEO</p>
+                                    <p id="final-company-vision" class="vision-text"></p>
+                                </div>
+                            </div>
+                            
+                            <div class="summary-stats">
+                                <div class="summary-stat">
+                                    <span class="stat-icon">🎯</span>
+                                    <div class="stat-info">
+                                        <span class="stat-label">Specialization</span>
+                                        <span class="stat-value" id="final-specialization">Not Selected</span>
+                                    </div>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-icon">📍</span>
+                                    <div class="stat-info">
+                                        <span class="stat-label">Location</span>
+                                        <span class="stat-value" id="final-location">Not Selected</span>
+                                    </div>
+                                </div>
+                                <div class="summary-stat">
+                                    <span class="stat-icon">💰</span>
+                                    <div class="stat-info">
+                                        <span class="stat-label">Starting Capital</span>
+                                        <span class="stat-value" id="final-capital">$0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="motivation-quote">
+                            <blockquote>
+                                "The best time to plant a tree was 20 years ago. The second best time is now."
+                            </blockquote>
+                            <cite>- Ancient Proverb</cite>
+                        </div>
+                        
+                        <button id="launch-company" class="launch-btn">
+                            <span class="btn-icon">🚀</span>
+                            <span>Launch My Company</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="creation-navigation">
+                <button id="prev-step" class="nav-btn secondary" disabled>
+                    <span>← Previous</span>
+                </button>
+                <button id="next-step" class="nav-btn primary">
+                    <span>Next →</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎮 Main Game Interface -->
     <div id="game-container" class="game-container hidden">
-        <!-- Header -->
+        <!-- Game Header -->
         <header class="game-header">
             <div class="header-left">
-                <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Logo" class="logo">
-                <h1>Software Tycoon</h1>
-            </div>
-            <div class="header-right">
-                <div class="money-display">
-                    <span class="money-icon">💰</span>
-                    <span id="money-amount">$100,000</span>
+                <div class="company-info">
+                    <div class="company-logo-game" id="game-company-logo">🚀</div>
+                    <div class="company-text">
+                        <h1 id="game-company-name">Your Company</h1>
+                        <p id="game-founder-title">Founder & CEO</p>
+                    </div>
                 </div>
-                <div class="reputation-display">
-                    <span class="rep-icon">⭐</span>
-                    <span id="reputation-amount">0</span>
+            </div>
+            
+            <div class="header-center">
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-icon">📅</span>
+                        <div class="stat-content">
+                            <span class="stat-value" id="game-day">Day 1</span>
+                            <span class="stat-label">Game Day</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-icon">📈</span>
+                        <div class="stat-content">
+                            <span class="stat-value" id="market-status">Stable</span>
+                            <span class="stat-label">Market</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="resource-display">
+                    <div class="resource-item money">
+                        <span class="resource-icon">💰</span>
+                        <span class="resource-value" id="money-display">$5,000</span>
+                    </div>
+                    <div class="resource-item reputation">
+                        <span class="resource-icon">⭐</span>
+                        <span class="resource-value" id="reputation-display">0</span>
+                    </div>
+                    <div class="resource-item legacy">
+                        <span class="resource-icon">👑</span>
+                        <span class="resource-value" id="legacy-display">0</span>
+                    </div>
                 </div>
             </div>
         </header>
 
         <!-- Main Game Area -->
         <main class="game-main">
-            <!-- Left Panel - Stats & Info -->
-            <aside class="left-panel">
-                <!-- Player Info -->
-                <section class="player-info">
-                    <h3>Your Empire</h3>
-                    <div class="stat-item">
-                        <span class="stat-label">Company:</span>
-                        <span id="company-name">Garage Soft</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Workplace:</span>
-                        <span id="workplace-level">Garage</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Employees:</span>
-                        <span id="employee-count">1</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Projects:</span>
-                        <span id="project-count">0</span>
-                    </div>
-                </section>
-
-                <!-- Skills -->
-                <section class="skills-section">
-                    <h3>Skills</h3>
-                    <div class="skill-item">
-                        <span class="skill-name">Coding</span>
-                        <div class="skill-bar">
-                            <div class="skill-progress" id="coding-skill" style="width: 20%"></div>
+            <!-- Left Sidebar: Company Management -->
+            <aside class="left-sidebar">
+                <div class="sidebar-section">
+                    <h3>Company Overview</h3>
+                    <div class="company-stats">
+                        <div class="stat-row">
+                            <span class="stat-name">Workplace</span>
+                            <span class="stat-value" id="workplace-level">Garage</span>
                         </div>
-                        <span class="skill-level" id="coding-level">1</span>
-                    </div>
-                    <div class="skill-item">
-                        <span class="skill-name">Marketing</span>
-                        <div class="skill-bar">
-                            <div class="skill-progress" id="marketing-skill" style="width: 10%"></div>
+                        <div class="stat-row">
+                            <span class="stat-name">Employees</span>
+                            <span class="stat-value" id="employee-count">1</span>
                         </div>
-                        <span class="skill-level" id="marketing-level">1</span>
-                    </div>
-                    <div class="skill-item">
-                        <span class="skill-name">Design</span>
-                        <div class="skill-bar">
-                            <div class="skill-progress" id="design-skill" style="width: 10%"></div>
+                        <div class="stat-row">
+                            <span class="stat-name">Active Projects</span>
+                            <span class="stat-value" id="active-projects">0</span>
                         </div>
-                        <span class="skill-level" id="design-level">1</span>
+                        <div class="stat-row">
+                            <span class="stat-name">Completed</span>
+                            <span class="stat-value" id="completed-projects">0</span>
+                        </div>
                     </div>
-                </section>
-
-                <!-- Hardware -->
-                <section class="hardware-section">
-                    <h3>Hardware</h3>
-                    <div class="hardware-item">
-                        <span class="hardware-icon">💻</span>
-                        <span id="hardware-type">Old PC</span>
-                        <button id="upgrade-hardware-btn" class="upgrade-btn">Upgrade ($5,000)</button>
-                    </div>
-                </section>
-            </aside>
-
-            <!-- Center Panel - Main Actions -->
-            <section class="center-panel">
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button id="develop-software-btn" class="action-btn primary">
-                        <span class="btn-icon">💻</span>
-                        <span class="btn-text">Develop Software</span>
-                        <span class="btn-cost">Free</span>
-                    </button>
-                    <button id="upgrade-workplace-btn" class="action-btn">
-                        <span class="btn-icon">🏢</span>
-                        <span class="btn-text">Upgrade Workplace</span>
-                        <span class="btn-cost">$10,000</span>
-                    </button>
-                    <button id="hire-employee-btn" class="action-btn">
-                        <span class="btn-icon">👥</span>
-                        <span class="btn-text">Hire Employee</span>
-                        <span class="btn-cost">$2,000</span>
-                    </button>
-                    <button id="marketing-campaign-btn" class="action-btn">
-                        <span class="btn-icon">📈</span>
-                        <span class="btn-text">Marketing Campaign</span>
-                        <span class="btn-cost">$1,000</span>
-                    </button>
                 </div>
 
-                <!-- Projects List -->
-                <section class="projects-section">
-                    <h3>Active Projects</h3>
-                    <div id="projects-list" class="projects-list">
-                        <div class="no-projects">No active projects. Start developing!</div>
+                <div class="sidebar-section">
+                    <h3>Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button id="develop-software" class="action-btn primary">
+                            <span class="btn-icon">💻</span>
+                            <span>Develop Software</span>
+                        </button>
+                        <button id="hire-employee" class="action-btn">
+                            <span class="btn-icon">👥</span>
+                            <span>Hire Employee</span>
+                        </button>
+                        <button id="upgrade-office" class="action-btn">
+                            <span class="btn-icon">🏢</span>
+                            <span>Upgrade Office</span>
+                        </button>
+                        <button id="marketing-campaign" class="action-btn">
+                            <span class="btn-icon">📢</span>
+                            <span>Marketing</span>
+                        </button>
                     </div>
-                </section>
+                </div>
 
-                <!-- Mini Game Area -->
-                <section id="mini-game-area" class="mini-game-area hidden">
-                    <h3 id="mini-game-title">Debug Challenge</h3>
-                    <div id="mini-game-content" class="mini-game-content">
-                        <!-- Mini-game content will be loaded here -->
+                <div class="sidebar-section">
+                    <h3>Skills</h3>
+                    <div class="skills-display" id="skills-container">
+                        <!-- Skills will be populated by JavaScript -->
                     </div>
-                </section>
+                </div>
+            </aside>
+
+            <!-- Center: Main Content Area -->
+            <section class="main-content">
+                <!-- Welcome Screen -->
+                <div id="welcome-screen" class="content-panel active">
+                    <div class="welcome-content">
+                        <h2>Welcome to Your Software Empire!</h2>
+                        <p>You're starting in a garage with just your laptop and a dream. Build innovative software, hire talented teams, and grow into a global tech giant.</p>
+                        
+                        <div class="getting-started">
+                            <h3>Getting Started:</h3>
+                            <div class="step-list">
+                                <div class="tutorial-step completed">
+                                    <span class="step-icon">✅</span>
+                                    <span>Create your company profile</span>
+                                </div>
+                                <div class="tutorial-step">
+                                    <span class="step-icon">💻</span>
+                                    <span>Develop your first software project</span>
+                                </div>
+                                <div class="tutorial-step">
+                                    <span class="step-icon">👥</span>
+                                    <span>Hire your first employee</span>
+                                </div>
+                                <div class="tutorial-step">
+                                    <span class="step-icon">🏢</span>
+                                    <span>Upgrade your workspace</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="start-developing" class="cta-btn">
+                            <span class="btn-icon">🚀</span>
+                            <span>Start Developing Software</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Projects Dashboard -->
+                <div id="projects-screen" class="content-panel">
+                    <div class="panel-header">
+                        <h2>Active Projects</h2>
+                        <button id="new-project-btn" class="action-btn primary">
+                            <span class="btn-icon">➕</span>
+                            <span>New Project</span>
+                        </button>
+                    </div>
+                    
+                    <div class="projects-container" id="projects-list">
+                        <div class="empty-state">
+                            <div class="empty-icon">📂</div>
+                            <h3>No Active Projects</h3>
+                            <p>Start developing your first software to begin your empire!</p>
+                            <button class="start-project-btn">Create Your First Project</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Management -->
+                <div id="team-screen" class="content-panel">
+                    <div class="panel-header">
+                        <h2>Team Management</h2>
+                        <button id="hire-team-btn" class="action-btn primary">
+                            <span class="btn-icon">👤</span>
+                            <span>Hire Employee</span>
+                        </button>
+                    </div>
+                    
+                    <div class="team-grid" id="team-list">
+                        <!-- Team members will be populated by JavaScript -->
+                    </div>
+                </div>
             </section>
 
-            <!-- Right Panel - Competition & Stats -->
-            <aside class="right-panel">
-                <!-- Competition -->
-                <section class="competition-section">
-                    <h3>Global Leaderboard</h3>
-                    <div class="leaderboard">
-                        <div class="leaderboard-item">
-                            <span class="rank">1.</span>
-                            <span class="company">TechGiant Corp</span>
-                            <span class="value">$50M</span>
-                        </div>
-                        <div class="leaderboard-item">
-                            <span class="rank">2.</span>
-                            <span class="company">InnovateSoft</span>
-                            <span class="value">$35M</span>
-                        </div>
-                        <div class="leaderboard-item">
-                            <span class="rank">3.</span>
-                            <span class="company">CodeMasters</span>
-                            <span class="value">$28M</span>
-                        </div>
-                        <div class="leaderboard-item player-rank">
-                            <span class="rank" id="player-rank">999.</span>
-                            <span class="company" id="player-company">Garage Soft</span>
-                            <span class="value" id="player-worth">$1K</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Market Trends -->
-                <section class="market-section">
+            <!-- Right Sidebar: Market & Competition -->
+            <aside class="right-sidebar">
+                <div class="sidebar-section">
                     <h3>Market Trends</h3>
-                    <div class="trend-item">
-                        <span class="trend-name">Mobile Apps</span>
-                        <span class="trend-value hot">🔥 Hot</span>
+                    <div class="market-trends" id="market-trends">
+                        <!-- Market data will be populated by JavaScript -->
                     </div>
-                    <div class="trend-item">
-                        <span class="trend-name">AI Tools</span>
-                        <span class="trend-value rising">📈 Rising</span>
-                    </div>
-                    <div class="trend-item">
-                        <span class="trend-name">VR Games</span>
-                        <span class="trend-value stable">➡️ Stable</span>
-                    </div>
-                    <div class="trend-item">
-                        <span class="trend-name">Security Tools</span>
-                        <span class="trend-value declining">📉 Declining</span>
-                    </div>
-                </section>
+                </div>
 
-                <!-- Achievements -->
-                <section class="achievements-section">
+                <div class="sidebar-section">
                     <h3>Achievements</h3>
-                    <div id="achievements-list" class="achievements-list">
-                        <div class="achievement-item locked">
+                    <div class="achievements-list" id="achievements-list">
+                        <div class="achievement locked">
                             <span class="achievement-icon">🏆</span>
-                            <span class="achievement-name">First Million</span>
-                        </div>
-                        <div class="achievement-item locked">
-                            <span class="achievement-icon">🎯</span>
-                            <span class="achievement-name">App Store Hit</span>
-                        </div>
-                        <div class="achievement-item locked">
-                            <span class="achievement-icon">👑</span>
-                            <span class="achievement-name">Tech Empire</span>
+                            <div class="achievement-info">
+                                <span class="achievement-name">First Project</span>
+                                <span class="achievement-desc">Complete your first software project</span>
+                            </div>
                         </div>
                     </div>
-                </section>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>Leaderboard</h3>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Leaderboard will be populated by JavaScript -->
+                    </div>
+                </div>
             </aside>
         </main>
 
-        <!-- Bottom Panel - Quick Stats & Actions -->
+        <!-- Game Footer -->
         <footer class="game-footer">
-            <div class="quick-stats">
-                <div class="quick-stat">
-                    <span class="stat-label">Passive Income:</span>
-                    <span id="passive-income">$0/min</span>
+            <div class="footer-stats">
+                <div class="footer-stat">
+                    <span class="stat-label">Total Revenue</span>
+                    <span class="stat-value" id="total-revenue">$0</span>
                 </div>
-                <div class="quick-stat">
-                    <span class="stat-label">Total Revenue:</span>
-                    <span id="total-revenue">$0</span>
+                <div class="footer-stat">
+                    <span class="stat-label">Success Rate</span>
+                    <span class="stat-value" id="success-rate">0%</span>
                 </div>
-                <div class="quick-stat">
-                    <span class="stat-label">Success Rate:</span>
-                    <span id="success-rate">0%</span>
+                <div class="footer-stat">
+                    <span class="stat-label">Team Size</span>
+                    <span class="stat-value" id="team-size">1</span>
                 </div>
             </div>
+            
             <div class="footer-actions">
-                <button id="save-game-btn" class="footer-btn">💾 Save</button>
-                <button id="reset-game-btn" class="footer-btn">🔄 Reset</button>
-                <button id="settings-btn" class="footer-btn">⚙️ Settings</button>
+                <button id="save-game" class="footer-btn">
+                    <span class="btn-icon">💾</span>
+                    <span>Save</span>
+                </button>
+                <button id="settings-btn" class="footer-btn">
+                    <span class="btn-icon">⚙️</span>
+                    <span>Settings</span>
+                </button>
+                <button id="help-btn" class="footer-btn">
+                    <span class="btn-icon">❓</span>
+                    <span>Help</span>
+                </button>
             </div>
         </footer>
     </div>
 
-    <!-- Modals -->
-    <!-- Software Development Modal -->
+    <!-- 🎯 Modal: Software Development -->
     <div id="software-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Develop New Software</h3>
-                <button class="close-btn" id="close-software-modal">&times;</button>
+                <h2>Develop New Software</h2>
+                <button class="modal-close" id="close-software-modal">×</button>
             </div>
+            
             <div class="modal-body">
-                <div class="software-type-selection">
-                    <h4>Choose Software Type:</h4>
-                    <div class="type-buttons">
-                        <button class="type-btn" data-type="app">
-                            <span class="type-icon">📱</span>
-                            <span>Mobile App</span>
-                            <small>Quick development, broad market</small>
-                        </button>
-                        <button class="type-btn" data-type="game">
-                            <span class="type-icon">🎮</span>
-                            <span>Game</span>
-                            <small>High profit potential, risky</small>
-                        </button>
-                        <button class="type-btn" data-type="tool">
-                            <span class="type-icon">🔧</span>
-                            <span>Utility Tool</span>
-                            <small>Steady income, business market</small>
-                        </button>
-                        <button class="type-btn locked" data-type="os">
-                            <span class="type-icon">🖥️</span>
-                            <span>Operating System</span>
-                            <small>Requires Corporate HQ</small>
-                        </button>
-                    </div>
+                <div class="software-types">
+                    <!-- Software types will be populated by JavaScript -->
                 </div>
-                <div class="software-customization hidden" id="software-customization">
-                    <div class="input-group">
-                        <label for="software-name">Software Name:</label>
-                        <input type="text" id="software-name" placeholder="My Awesome App">
+                
+                <div class="project-details hidden" id="project-details">
+                    <div class="detail-section">
+                        <label for="project-name">Project Name</label>
+                        <input type="text" id="project-name" placeholder="Enter project name">
                     </div>
-                    <div class="input-group">
-                        <label for="software-features">Features (affects quality):</label>
-                        <div class="feature-checkboxes">
-                            <label><input type="checkbox" value="ui"> Modern UI</label>
-                            <label><input type="checkbox" value="analytics"> Analytics</label>
-                            <label><input type="checkbox" value="cloud"> Cloud Sync</label>
-                            <label><input type="checkbox" value="ai"> AI Integration</label>
+                    
+                    <div class="detail-section">
+                        <label for="project-features">Features</label>
+                        <div class="features-grid" id="features-grid">
+                            <!-- Features will be populated by JavaScript -->
                         </div>
                     </div>
-                    <div class="development-cost">
-                        <span>Development Cost: $<span id="dev-cost">500</span></span>
-                        <span>Estimated Time: <span id="dev-time">2 hours</span></span>
+                    
+                    <div class="project-summary">
+                        <div class="summary-item">
+                            <span class="summary-label">Development Time</span>
+                            <span class="summary-value" id="dev-time">0 days</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Development Cost</span>
+                            <span class="summary-value" id="dev-cost">$0</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Expected Revenue</span>
+                            <span class="summary-value" id="expected-revenue">$0</span>
+                        </div>
                     </div>
-                    <button id="start-development-btn" class="action-btn primary">Start Development</button>
+                    
+                    <button id="start-development" class="modal-btn primary">
+                        <span class="btn-icon">🚀</span>
+                        <span>Start Development</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- 🎯 Modal: Settings -->
     <div id="settings-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>Settings</h3>
-                <button class="close-btn" id="close-settings-modal">&times;</button>
+                <h2>Game Settings</h2>
+                <button class="modal-close" id="close-settings-modal">×</button>
             </div>
+            
             <div class="modal-body">
-                <div class="setting-item">
-                    <label for="company-name-input">Company Name:</label>
-                    <input type="text" id="company-name-input" value="Garage Soft">
+                <div class="settings-section">
+                    <h3>Gameplay</h3>
+                    <div class="setting-item">
+                        <label for="auto-save">Auto Save</label>
+                        <input type="checkbox" id="auto-save" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label for="notifications">Notifications</label>
+                        <input type="checkbox" id="notifications" checked>
+                    </div>
+                    <div class="setting-item">
+                        <label for="game-speed">Game Speed</label>
+                        <select id="game-speed">
+                            <option value="0.5">Slow (0.5x)</option>
+                            <option value="1" selected>Normal (1x)</option>
+                            <option value="2">Fast (2x)</option>
+                            <option value="5">Very Fast (5x)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="setting-item">
-                    <label for="auto-save">Auto Save:</label>
-                    <input type="checkbox" id="auto-save" checked>
+                
+                <div class="settings-section">
+                    <h3>Data</h3>
+                    <div class="setting-actions">
+                        <button id="export-save" class="setting-btn">Export Save</button>
+                        <button id="import-save" class="setting-btn">Import Save</button>
+                        <button id="reset-game" class="setting-btn danger">Reset Game</button>
+                    </div>
                 </div>
-                <div class="setting-item">
-                    <label for="sound-effects">Sound Effects:</label>
-                    <input type="checkbox" id="sound-effects" checked>
-                </div>
-                <div class="setting-item">
-                    <label for="notifications">Notifications:</label>
-                    <input type="checkbox" id="notifications" checked>
-                </div>
-                <button id="save-settings-btn" class="action-btn primary">Save Settings</button>
             </div>
         </div>
     </div>
 
-    <!-- Notification System -->
-    <div id="notifications" class="notifications"></div>
+    <!-- 📱 Notification Container -->
+    <div id="notifications" class="notifications-container"></div>
 
-    <!-- Install Prompt -->
+    <!-- 🚀 Install Prompt -->
     <div id="install-prompt" class="install-prompt hidden">
         <div class="install-content">
-            <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Install" class="install-icon">
-            <div class="install-text">
-                <h4>Install Software Tycoon</h4>
-                <p>Add to your home screen for the best experience!</p>
-            </div>
+            <h3>Install Software Tycoon</h3>
+            <p>Add to your home screen for the best experience!</p>
             <div class="install-actions">
-                <button id="install-btn" class="install-button">Install</button>
-                <button id="dismiss-install" class="dismiss-button">Maybe Later</button>
+                <button id="install-app" class="install-btn primary">Install</button>
+                <button id="dismiss-install" class="install-btn secondary">Later</button>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- JavaScript -->
     <script src="script.js"></script>
-    <script>
-        // PWA Installation
-        let deferredPrompt;
-        const installPrompt = document.getElementById('install-prompt');
-        const installBtn = document.getElementById('install-btn');
-        const dismissInstall = document.getElementById('dismiss-install');
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installPrompt.classList.remove('hidden');
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installPrompt.classList.add('hidden');
-                }
-                deferredPrompt = null;
-            }
-        });
-
-        dismissInstall.addEventListener('click', () => {
-            installPrompt.classList.add('hidden');
-        });
-
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => console.log('SW registered'))
-                    .catch(registrationError => console.log('SW registration failed'));
-            });
-        }
-
-        // Loading Screen
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
-                document.getElementById('game-container').classList.remove('hidden');
-            }, 2000);
-        });
-    </script>
 </body>
 </html>

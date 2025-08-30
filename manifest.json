@@ -1,44 +1,42 @@
 {
-  "name": "Software Tycoon",
-  "short_name": "SoftwareTycoon",
-  "description": "Build your software empire from garage to global tech giant. Develop apps, games, and tools while managing your team and growing your business.",
-  "version": "1.0.0",
-  "manifest_version": 2,
-  "start_url": "/index.html",
-  "scope": "/",
+  "name": "Software Tycoon v2.1.0",
+  "short_name": "Software Tycoon",
+  "description": "Build your software empire from garage startup to global tech giant. Create apps, hire teams, manage projects, and dominate the technology industry in this immersive business simulation game.",
+  "version": "2.1.0",
+  "developer": {
+    "name": "AL Software Studio",
+    "url": "https://alsoftwarestudio.com"
+  },
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "theme_color": "#1a1a2e",
+  "display_override": ["standalone", "minimal-ui", "fullscreen", "browser"],
+  "orientation": "any",
   "background_color": "#0a0a0a",
+  "theme_color": "#e94560",
   "lang": "en-US",
   "dir": "ltr",
+  "id": "software-tycoon-v2",
   "categories": [
+    "business",
     "games",
     "simulation",
-    "business",
-    "strategy"
+    "strategy",
+    "productivity",
+    "entertainment",
+    "education"
   ],
-  "screenshots": [
-    {
-      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
+  "keywords": [
+    "business simulation",
+    "software development",
+    "startup game",
+    "tech tycoon",
+    "programming game",
+    "business strategy",
+    "entrepreneurship",
+    "coding simulation"
   ],
   "icons": [
-    {
-      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
-      "sizes": "16x16",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
-      "sizes": "32x32",
-      "type": "image/png",
-      "purpose": "any"
-    },
     {
       "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
       "sizes": "48x48",
@@ -59,13 +57,37 @@
     },
     {
       "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     },
     {
       "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -86,14 +108,37 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Software Tycoon - Main Game Dashboard"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile Gaming Experience"
+    },
+    {
+      "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+      "sizes": "1024x768",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Company Creation Wizard"
     }
   ],
   "shortcuts": [
     {
-      "name": "New Project",
-      "short_name": "Develop",
-      "description": "Start developing new software",
-      "url": "/index.html?action=develop",
+      "name": "New Game",
+      "short_name": "New",
+      "description": "Start a new software company",
+      "url": "./?action=new",
       "icons": [
         {
           "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
@@ -103,10 +148,23 @@
       ]
     },
     {
-      "name": "View Stats",
+      "name": "Continue Game",
+      "short_name": "Continue",
+      "description": "Resume your existing company",
+      "url": "./?action=continue",
+      "icons": [
+        {
+          "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Statistics",
       "short_name": "Stats",
-      "description": "Check your company statistics",
-      "url": "/index.html?action=stats",
+      "description": "View your company performance",
+      "url": "./?view=stats",
       "icons": [
         {
           "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
@@ -116,10 +174,10 @@
       ]
     },
     {
-      "name": "Hire Team",
-      "short_name": "Hire",
-      "description": "Expand your development team",
-      "url": "/index.html?action=hire",
+      "name": "Achievements",
+      "short_name": "Awards",
+      "description": "View unlocked achievements",
+      "url": "./?view=achievements",
       "icons": [
         {
           "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
@@ -129,60 +187,78 @@
       ]
     }
   ],
-  "related_applications": [],
   "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "web",
+      "url": "https://softwaretycoon.alsoftwarestudio.com/"
+    }
+  ],
   "edge_side_panel": {
     "preferred_width": 400
   },
   "launch_handler": {
-    "client_mode": "focus-existing"
+    "client_mode": "navigate-existing"
   },
-  "file_handlers": [
-    {
-      "action": "/index.html",
-      "accept": {
-        "application/json": [".json"]
-      }
-    }
-  ],
+  "serviceworker": {
+    "src": "./sw.js",
+    "scope": "./",
+    "use_cache": true
+  },
   "protocol_handlers": [
     {
       "protocol": "web+softwaretycoon",
-      "url": "/index.html?action=%s"
+      "url": "./?share=%s"
     }
   ],
   "share_target": {
-    "action": "/index.html",
-    "method": "GET",
+    "action": "./share/",
+    "method": "POST",
+    "enctype": "multipart/form-data",
     "params": {
       "title": "title",
       "text": "text",
-      "url": "url"
+      "url": "url",
+      "files": [
+        {
+          "name": "save_file",
+          "accept": ["application/json", ".json"]
+        }
+      ]
     }
   },
-  "features": [
-    "Cross Origin Embedder Policy",
-    "Cross Origin Isolation"
+  "file_handlers": [
+    {
+      "action": "./open-save/",
+      "accept": {
+        "application/json": [".json"],
+        "text/plain": [".txt"]
+      },
+      "icons": [
+        {
+          "src": "https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
   ],
+  "note_taking": {
+    "new_note_url": "./notes/"
+  },
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
   "permissions": [
-    "storage"
+    "notifications"
   ],
-  "offline_enabled": true,
-  "installable": true,
-  "app": {
-    "background": {
-      "scripts": ["sw.js"]
-    },
-    "content_security_policy": "script-src 'self'; object-src 'self'"
-  },
-  "web_accessible_resources": [
-    "index.html",
-    "script.js",
-    "styles.css"
+  "features": [
+    "cross-origin-isolated"
   ],
-  "developer": {
-    "name": "Software Tycoon Team",
-    "url": "https://softwaretycoon.game"
-  },
-  "iarc_rating_id": "e58c174a-81d0-4e3b-8504-d5e6948906bd"
+  "handle_links": "preferred",
+  "capture_links": "existing-client-navigate",
+  "scope_extensions": [
+    {
+      "origin": "*.alsoftwarestudio.com"
+    }
+  ]
 }

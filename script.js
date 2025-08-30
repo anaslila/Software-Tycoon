@@ -1,753 +1,1642 @@
-// Software Tycoon - Complete Game Logic
-// Author: AI Assistant | Date: August 30, 2025
+// Software Tycoon v2.1.0 - Complete Game Engine
+// Developer: AL Software Studio | Last Updated: 30 August, 2025
+// 🚀 Complete rebuild with bug fixes and new features
 
 class SoftwareTycoon {
     constructor() {
+        this.version = '2.1.0';
+        this.lastUpdated = '30 August 2025';
+        
+        // Game State
         this.gameState = {
-            money: 1000,
+            // Company Information
+            company: {
+                name: '',
+                founder: '',
+                vision: '',
+                logo: '🚀',
+                specialization: '',
+                location: '',
+                founded: new Date().getFullYear()
+            },
+            
+            // Core Resources
+            money: 5000,
             reputation: 0,
+            legacyPoints: 0,
             totalRevenue: 0,
-            companyName: "Garage Soft",
+            
+            // Game Progress
+            dayCount: 1,
+            gameSpeed: 1,
+            
+            // Company Status
             workplace: {
                 level: 0,
-                name: "Garage",
+                name: 'Garage',
                 capacity: 1,
-                speed: 1.0,
-                cost: 10000
+                efficiency: 1.0,
+                upgradeCost: 10000
             },
-            hardware: {
-                level: 0,
-                name: "Old PC",
-                speed: 1.0,
-                cost: 5000
-            },
+            
+            // Skills System
             skills: {
-                coding: { level: 1, xp: 0 },
-                marketing: { level: 1, xp: 0 },
-                design: { level: 1, xp: 0 },
-                networking: { level: 1, xp: 0 },
-                aiResearch: { level: 1, xp: 0 }
+                coding: { level: 1, xp: 0, maxXp: 100 },
+                design: { level: 1, xp: 0, maxXp: 100 },
+                marketing: { level: 1, xp: 0, maxXp: 100 },
+                leadership: { level: 1, xp: 0, maxXp: 100 },
+                research: { level: 1, xp: 0, maxXp: 100 }
             },
+            
+            // Team Management
             employees: {
-                programmers: 0,
+                developers: 0,
                 designers: 0,
                 marketers: 0,
-                testers: 0
+                researchers: 0
             },
-            projects: [],
+            
+            // Projects
+            activeProjects: [],
+            completedProjects: [],
+            
+            // Market Data
+            marketTrends: {
+                mobile: { demand: 1.2, trend: 'up' },
+                web: { demand: 1.0, trend: 'stable' },
+                desktop: { demand: 0.8, trend: 'down' },
+                ai: { demand: 1.5, trend: 'up' },
+                game: { demand: 1.1, trend: 'stable' }
+            },
+            
+            // Achievements
             achievements: [],
+            
+            // Settings
             settings: {
                 autoSave: true,
-                soundEffects: true,
-                notifications: true
-            },
-            statistics: {
-                projectsCompleted: 0,
-                successfulProjects: 0,
-                passiveIncome: 0
+                notifications: true,
+                gameSpeed: 1
             }
         };
 
-        this.workplaces = [
-            { name: "Garage", capacity: 1, speed: 1.0, cost: 0 },
-            { name: "Small Office", capacity: 3, speed: 1.2, cost: 10000 },
-            { name: "Startup Hub", capacity: 8, speed: 1.5, cost: 50000 },
-            { name: "Corporate HQ", capacity: 20, speed: 2.0, cost: 200000 },
-            { name: "Global Tech Campus", capacity: 50, speed: 3.0, cost: 1000000 }
-        ];
+        // Company Creation State
+        this.creationState = {
+            currentStep: 1,
+            maxSteps: 5,
+            isValid: false
+        };
 
-        this.hardwareTypes = [
-            { name: "Old PC", speed: 1.0, cost: 0 },
-            { name: "Gaming Rig", speed: 1.3, cost: 5000 },
-            { name: "Workstation", speed: 1.7, cost: 15000 },
-            { name: "Server Rack", speed: 2.2, cost: 50000 },
-            { name: "Supercomputer", speed: 3.0, cost: 200000 }
-        ];
-
+        // Game Data
         this.softwareTypes = {
-            app: {
-                name: "Mobile App",
-                baseCost: 500,
-                baseTime: 2,
-                baseRevenue: 1000,
-                marketDemand: 1.2,
-                unlockLevel: 0
+            mobile: {
+                name: 'Mobile App',
+                icon: '📱',
+                baseCost: 1000,
+                baseTime: 3,
+                baseRevenue: 3000,
+                features: ['UI/UX Design', 'Push Notifications', 'In-App Purchases', 'Social Integration', 'Analytics']
             },
-            game: {
-                name: "Game",
-                baseCost: 2000,
-                baseTime: 8,
-                baseRevenue: 5000,
-                marketDemand: 1.0,
-                unlockLevel: 0
-            },
-            tool: {
-                name: "Utility Tool",
+            web: {
+                name: 'Web Application',
+                icon: '🌐',
                 baseCost: 1500,
                 baseTime: 5,
-                baseRevenue: 3000,
-                marketDemand: 0.8,
-                unlockLevel: 0
+                baseRevenue: 5000,
+                features: ['Responsive Design', 'Database Integration', 'User Authentication', 'API Development', 'SEO Optimization']
             },
-            os: {
-                name: "Operating System",
-                baseCost: 100000,
-                baseTime: 50,
-                baseRevenue: 500000,
-                marketDemand: 0.3,
-                unlockLevel: 3
+            desktop: {
+                name: 'Desktop Software',
+                icon: '💻',
+                baseCost: 2000,
+                baseTime: 7,
+                baseRevenue: 7000,
+                features: ['Cross-Platform', 'File Management', 'System Integration', 'Auto-Updates', 'Plugin System']
+            },
+            game: {
+                name: 'Video Game',
+                icon: '🎮',
+                baseCost: 3000,
+                baseTime: 10,
+                baseRevenue: 10000,
+                features: ['3D Graphics', 'Multiplayer', 'Achievement System', 'Sound Design', 'Level Editor']
+            },
+            ai: {
+                name: 'AI Software',
+                icon: '🤖',
+                baseCost: 5000,
+                baseTime: 15,
+                baseRevenue: 20000,
+                features: ['Machine Learning', 'Natural Language Processing', 'Computer Vision', 'Neural Networks', 'Data Analytics']
             }
         };
 
-        this.marketTrends = [
-            { name: "Mobile Apps", demand: 1.2, trend: "hot" },
-            { name: "AI Tools", demand: 1.4, trend: "rising" },
-            { name: "VR Games", demand: 0.9, trend: "stable" },
-            { name: "Security Tools", demand: 0.7, trend: "declining" }
-        ];
-
         this.achievementsList = [
-            { id: "first_project", name: "Hello World", description: "Complete your first project", condition: () => this.gameState.statistics.projectsCompleted >= 1 },
-            { id: "first_million", name: "First Million", description: "Earn $1,000,000", condition: () => this.gameState.totalRevenue >= 1000000 },
-            { id: "hire_10", name: "Growing Team", description: "Hire 10 employees", condition: () => this.getTotalEmployees() >= 10 },
-            { id: "upgrade_workplace", name: "Moving Up", description: "Upgrade your workplace", condition: () => this.gameState.workplace.level >= 1 },
-            { id: "tech_empire", name: "Tech Empire", description: "Reach Global Tech Campus", condition: () => this.gameState.workplace.level >= 4 }
+            {
+                id: 'first_project',
+                name: 'Hello World',
+                description: 'Complete your first project',
+                icon: '🏆',
+                condition: () => this.gameState.completedProjects.length >= 1,
+                reward: { money: 1000, reputation: 10 }
+            },
+            {
+                id: 'first_employee',
+                name: 'Growing Team',
+                description: 'Hire your first employee',
+                icon: '👥',
+                condition: () => this.getTotalEmployees() > 1,
+                reward: { money: 500, reputation: 5 }
+            },
+            {
+                id: 'first_million',
+                name: 'Millionaire',
+                description: 'Earn $1,000,000 in total revenue',
+                icon: '💎',
+                condition: () => this.gameState.totalRevenue >= 1000000,
+                reward: { money: 10000, reputation: 50 }
+            }
         ];
 
+        this.gameLoopInterval = null;
+        this.lastSaveTime = 0;
+        
         this.init();
     }
 
+    // ===============================
+    // INITIALIZATION
+    // ===============================
+    
     init() {
+        console.log('🚀 Software Tycoon v2.1.0 initializing...');
+        
+        // Load saved game
         this.loadGame();
+        
+        // Setup loading screen
+        this.setupLoadingScreen();
+        
+        // Bind all events
         this.bindEvents();
-        this.updateUI();
+        
+        // Check if company exists
+        const savedCompany = localStorage.getItem('softwareTycoon_company');
+        
+        if (savedCompany) {
+            // Load existing company
+            try {
+                this.gameState.company = { ...this.gameState.company, ...JSON.parse(savedCompany) };
+                this.startGame();
+            } catch (error) {
+                console.error('Error loading company:', error);
+                this.showCompanyCreation();
+            }
+        } else {
+            // Show company creation
+            this.showCompanyCreation();
+        }
+    }
+
+    setupLoadingScreen() {
+        const loadingProgress = document.querySelector('.loading-progress');
+        const loadingStatus = document.querySelector('.loading-status');
+        
+        const steps = [
+            'Initializing game engine...',
+            'Loading assets...',
+            'Setting up workspace...',
+            'Preparing UI...',
+            'Ready to launch!'
+        ];
+        
+        let currentStep = 0;
+        
+        const progressInterval = setInterval(() => {
+            const progress = ((currentStep + 1) / steps.length) * 100;
+            loadingProgress.style.width = `${progress}%`;
+            loadingStatus.textContent = steps[currentStep];
+            
+            currentStep++;
+            
+            if (currentStep >= steps.length) {
+                clearInterval(progressInterval);
+                setTimeout(() => {
+                    this.hideLoadingScreen();
+                }, 500);
+            }
+        }, 400);
+    }
+
+    hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        loadingScreen.classList.add('hidden');
+    }
+
+    showCompanyCreation() {
+        this.hideLoadingScreen();
+        const companyCreation = document.getElementById('company-creation');
+        companyCreation.classList.remove('hidden');
+        this.updateCreationStep();
+    }
+
+    startGame() {
+        this.hideLoadingScreen();
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.classList.remove('hidden');
+        
+        this.initializeGameUI();
         this.startGameLoop();
-        this.showNotification("Welcome to Software Tycoon!", "success");
+        this.showNotification(`Welcome back to ${this.gameState.company.name}!`, 'success');
     }
 
-    // Game Loop
-    startGameLoop() {
-        setInterval(() => {
-            this.updateProjects();
-            this.generatePassiveIncome();
-            this.updateMarketTrends();
-            this.checkAchievements();
-            this.updateUI();
-            
-            if (this.gameState.settings.autoSave) {
-                this.saveGame();
-            }
-        }, 1000); // Update every second
-    }
-
-    // Event Binding
+    // ===============================
+    // EVENT BINDING
+    // ===============================
+    
     bindEvents() {
-        // Main action buttons
-        document.getElementById('develop-software-btn').addEventListener('click', () => this.showSoftwareModal());
-        document.getElementById('upgrade-workplace-btn').addEventListener('click', () => this.upgradeWorkplace());
-        document.getElementById('hire-employee-btn').addEventListener('click', () => this.showHireModal());
-        document.getElementById('marketing-campaign-btn').addEventListener('click', () => this.runMarketingCampaign());
-        document.getElementById('upgrade-hardware-btn').addEventListener('click', () => this.upgradeHardware());
+        console.log('Binding event listeners...');
+        
+        // Company Creation Events
+        this.bindCreationEvents();
+        
+        // Game Events
+        this.bindGameEvents();
+        
+        // Modal Events
+        this.bindModalEvents();
+        
+        // Settings Events
+        this.bindSettingsEvents();
+        
+        console.log('✅ All events bound successfully');
+    }
 
-        // Modal controls
-        document.getElementById('close-software-modal').addEventListener('click', () => this.hideSoftwareModal());
-        document.getElementById('close-settings-modal').addEventListener('click', () => this.hideSettingsModal());
-        document.getElementById('start-development-btn').addEventListener('click', () => this.startDevelopment());
-
-        // Software type selection
-        document.querySelectorAll('.type-btn:not(.locked)').forEach(btn => {
-            btn.addEventListener('click', (e) => this.selectSoftwareType(e.target.closest('.type-btn').dataset.type));
+    bindCreationEvents() {
+        // Navigation buttons
+        const nextBtn = document.getElementById('next-step');
+        const prevBtn = document.getElementById('prev-step');
+        const launchBtn = document.getElementById('launch-company');
+        
+        if (nextBtn) nextBtn.addEventListener('click', () => this.nextStep());
+        if (prevBtn) prevBtn.addEventListener('click', () => this.prevStep());
+        if (launchBtn) launchBtn.addEventListener('click', () => this.launchCompany());
+        
+        // Form inputs
+        const founderInput = document.getElementById('founder-name');
+        const companyInput = document.getElementById('company-name');
+        const visionInput = document.getElementById('company-vision');
+        
+        if (founderInput) founderInput.addEventListener('input', (e) => this.updateCompanyData('founder', e.target.value));
+        if (companyInput) companyInput.addEventListener('input', (e) => this.updateCompanyData('name', e.target.value));
+        if (visionInput) visionInput.addEventListener('input', (e) => this.updateCompanyData('vision', e.target.value));
+        
+        // Logo selection
+        const logoFile = document.getElementById('logo-file');
+        const logoUpload = document.getElementById('logo-upload');
+        
+        if (logoFile) logoFile.addEventListener('change', (e) => this.handleLogoUpload(e));
+        if (logoUpload) logoUpload.addEventListener('click', () => logoFile?.click());
+        
+        // Preset logos
+        document.querySelectorAll('.preset-logo').forEach(logo => {
+            logo.addEventListener('click', (e) => {
+                const logoValue = e.target.dataset.logo;
+                if (logoValue) this.selectLogo(logoValue);
+            });
         });
-
-        // Footer actions
-        document.getElementById('save-game-btn').addEventListener('click', () => this.saveGame());
-        document.getElementById('reset-game-btn').addEventListener('click', () => this.resetGame());
-        document.getElementById('settings-btn').addEventListener('click', () => this.showSettingsModal());
-
-        // Settings
-        document.getElementById('save-settings-btn').addEventListener('click', () => this.saveSettings());
+        
+        // Specialization selection
+        document.querySelectorAll('.spec-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const spec = e.currentTarget.dataset.spec;
+                if (spec) this.selectSpecialization(spec);
+            });
+        });
+        
+        // Location selection
+        document.querySelectorAll('.location-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                const location = e.currentTarget.dataset.location;
+                if (location) this.selectLocation(location);
+            });
+        });
     }
 
-    // Software Development
-    showSoftwareModal() {
-        document.getElementById('software-modal').classList.remove('hidden');
-        this.updateSoftwareTypes();
+    bindGameEvents() {
+        // Header actions
+        const saveBtn = document.getElementById('save-game');
+        const settingsBtn = document.getElementById('settings-btn');
+        const helpBtn = document.getElementById('help-btn');
+        
+        if (saveBtn) saveBtn.addEventListener('click', () => this.saveGame(true));
+        if (settingsBtn) settingsBtn.addEventListener('click', () => this.showModal('settings-modal'));
+        if (helpBtn) helpBtn.addEventListener('click', () => this.showHelp());
+        
+        // Quick actions
+        const developBtn = document.getElementById('develop-software');
+        const hireBtn = document.getElementById('hire-employee');
+        const upgradeBtn = document.getElementById('upgrade-office');
+        const marketingBtn = document.getElementById('marketing-campaign');
+        
+        if (developBtn) developBtn.addEventListener('click', () => this.showModal('software-modal'));
+        if (hireBtn) hireBtn.addEventListener('click', () => this.hireEmployee());
+        if (upgradeBtn) upgradeBtn.addEventListener('click', () => this.upgradeOffice());
+        if (marketingBtn) marketingBtn.addEventListener('click', () => this.runMarketingCampaign());
+        
+        // Alternative project creation buttons
+        const startDevelopingBtn = document.getElementById('start-developing');
+        const newProjectBtn = document.getElementById('new-project-btn');
+        const startProjectBtn = document.querySelector('.start-project-btn');
+        
+        if (startDevelopingBtn) startDevelopingBtn.addEventListener('click', () => this.showModal('software-modal'));
+        if (newProjectBtn) newProjectBtn.addEventListener('click', () => this.showModal('software-modal'));
+        if (startProjectBtn) startProjectBtn.addEventListener('click', () => this.showModal('software-modal'));
     }
 
-    hideSoftwareModal() {
-        document.getElementById('software-modal').classList.add('hidden');
-        document.getElementById('software-customization').classList.add('hidden');
+    bindModalEvents() {
+        // Modal close buttons
+        document.querySelectorAll('.modal-close').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const modal = e.target.closest('.modal');
+                if (modal) this.hideModal(modal.id);
+            });
+        });
+        
+        // Modal backdrops
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.addEventListener('click', (e) => {
+                const modal = e.target.closest('.modal');
+                if (modal) this.hideModal(modal.id);
+            });
+        });
+        
+        // Software modal events
+        const startDevBtn = document.getElementById('start-development');
+        if (startDevBtn) startDevBtn.addEventListener('click', () => this.startDevelopment());
     }
 
-    updateSoftwareTypes() {
-        const typeButtons = document.querySelectorAll('.type-btn');
-        typeButtons.forEach(btn => {
-            const type = btn.dataset.type;
-            const softwareType = this.softwareTypes[type];
-            
-            if (softwareType && this.gameState.workplace.level >= softwareType.unlockLevel) {
-                btn.classList.remove('locked');
-            } else {
-                btn.classList.add('locked');
+    bindSettingsEvents() {
+        // Settings toggles
+        const autoSaveToggle = document.getElementById('auto-save');
+        const notificationsToggle = document.getElementById('notifications');
+        const gameSpeedSelect = document.getElementById('game-speed');
+        
+        if (autoSaveToggle) {
+            autoSaveToggle.addEventListener('change', (e) => {
+                this.gameState.settings.autoSave = e.target.checked;
+                this.saveSettings();
+            });
+        }
+        
+        if (notificationsToggle) {
+            notificationsToggle.addEventListener('change', (e) => {
+                this.gameState.settings.notifications = e.target.checked;
+                this.saveSettings();
+            });
+        }
+        
+        if (gameSpeedSelect) {
+            gameSpeedSelect.addEventListener('change', (e) => {
+                this.gameState.settings.gameSpeed = parseFloat(e.target.value);
+                this.gameState.gameSpeed = this.gameState.settings.gameSpeed;
+                this.saveSettings();
+                this.restartGameLoop();
+            });
+        }
+        
+        // Data management
+        const exportBtn = document.getElementById('export-save');
+        const importBtn = document.getElementById('import-save');
+        const resetBtn = document.getElementById('reset-game');
+        
+        if (exportBtn) exportBtn.addEventListener('click', () => this.exportSave());
+        if (importBtn) importBtn.addEventListener('click', () => this.importSave());
+        if (resetBtn) resetBtn.addEventListener('click', () => this.resetGame());
+    }
+
+    // ===============================
+    // COMPANY CREATION
+    // ===============================
+    
+    nextStep() {
+        if (this.validateCurrentStep()) {
+            if (this.creationState.currentStep < this.creationState.maxSteps) {
+                this.creationState.currentStep++;
+                this.updateCreationStep();
             }
+        }
+    }
+
+    prevStep() {
+        if (this.creationState.currentStep > 1) {
+            this.creationState.currentStep--;
+            this.updateCreationStep();
+        }
+    }
+
+    validateCurrentStep() {
+        const step = this.creationState.currentStep;
+        
+        switch (step) {
+            case 1:
+                if (!this.gameState.company.founder?.trim()) {
+                    this.showNotification('Please enter your name', 'error');
+                    return false;
+                }
+                if (!this.gameState.company.name?.trim()) {
+                    this.showNotification('Please enter a company name', 'error');
+                    return false;
+                }
+                break;
+                
+            case 2:
+                // Logo is optional, default is set
+                break;
+                
+            case 3:
+                if (!this.gameState.company.specialization) {
+                    this.showNotification('Please select a specialization', 'error');
+                    return false;
+                }
+                break;
+                
+            case 4:
+                if (!this.gameState.company.location) {
+                    this.showNotification('Please select a location', 'error');
+                    return false;
+                }
+                break;
+        }
+        
+        return true;
+    }
+
+    updateCreationStep() {
+        // Update step visibility
+        document.querySelectorAll('.creation-step').forEach((step, index) => {
+            step.classList.toggle('active', index + 1 === this.creationState.currentStep);
+        });
+        
+        // Update progress indicators
+        document.querySelectorAll('.step-indicator').forEach((indicator, index) => {
+            const stepNum = index + 1;
+            indicator.classList.toggle('active', stepNum === this.creationState.currentStep);
+            indicator.classList.toggle('completed', stepNum < this.creationState.currentStep);
+        });
+        
+        // Update progress bar
+        const progressFill = document.querySelector('.progress-fill');
+        const progress = (this.creationState.currentStep / this.creationState.maxSteps) * 100;
+        if (progressFill) progressFill.style.width = `${progress}%`;
+        
+        // Update navigation buttons
+        const prevBtn = document.getElementById('prev-step');
+        const nextBtn = document.getElementById('next-step');
+        
+        if (prevBtn) prevBtn.disabled = this.creationState.currentStep === 1;
+        if (nextBtn) nextBtn.style.display = this.creationState.currentStep === this.creationState.maxSteps ? 'none' : 'block';
+        
+        // Update previews and summary
+        this.updatePreviews();
+        if (this.creationState.currentStep === 5) {
+            this.updateFinalSummary();
+        }
+    }
+
+    updateCompanyData(field, value) {
+        this.gameState.company[field] = value;
+        this.updatePreviews();
+    }
+
+    selectLogo(logo) {
+        this.gameState.company.logo = logo;
+        
+        // Update visual selection
+        document.querySelectorAll('.preset-logo').forEach(btn => {
+            btn.classList.toggle('selected', btn.dataset.logo === logo);
+        });
+        
+        this.updatePreviews();
+    }
+
+    handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            if (file.size > 2 * 1024 * 1024) { // 2MB limit
+                this.showNotification('Image too large. Please choose a file under 2MB.', 'error');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.gameState.company.logo = e.target.result;
+                this.updatePreviews();
+            };
+            reader.readAsDataURL(file);
+        } else {
+            this.showNotification('Please select a valid image file.', 'error');
+        }
+    }
+
+    selectSpecialization(spec) {
+        this.gameState.company.specialization = spec;
+        
+        // Update visual selection
+        document.querySelectorAll('.spec-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.spec === spec);
+        });
+        
+        this.updatePreviews();
+    }
+
+    selectLocation(location) {
+        this.gameState.company.location = location;
+        
+        // Update visual selection
+        document.querySelectorAll('.location-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.location === location);
+        });
+        
+        this.updatePreviews();
+    }
+
+    updatePreviews() {
+        // Update logo preview
+        const logoPreview = document.getElementById('logo-preview');
+        if (logoPreview) {
+            if (this.gameState.company.logo.startsWith('data:image')) {
+                logoPreview.innerHTML = `<img src="${this.gameState.company.logo}" alt="Logo">`;
+            } else {
+                logoPreview.textContent = this.gameState.company.logo;
+            }
+        }
+        
+        // Update company name preview
+        const namePreview = document.getElementById('company-name-preview');
+        if (namePreview) {
+            namePreview.textContent = this.gameState.company.name || 'Your Company';
+        }
+        
+        // Update founder preview
+        const founderPreview = document.getElementById('founder-preview');
+        if (founderPreview) {
+            founderPreview.textContent = (this.gameState.company.founder || 'Founder') + ' & CEO';
+        }
+    }
+
+    updateFinalSummary() {
+        // Update final logo
+        const finalLogo = document.getElementById('final-logo-preview');
+        if (finalLogo) {
+            if (this.gameState.company.logo.startsWith('data:image')) {
+                finalLogo.innerHTML = `<img src="${this.gameState.company.logo}" alt="Logo">`;
+            } else {
+                finalLogo.textContent = this.gameState.company.logo;
+            }
+        }
+        
+        // Update text fields
+        this.updateElement('final-company-name', this.gameState.company.name);
+        this.updateElement('final-founder-name', this.gameState.company.founder + ', Founder & CEO');
+        
+        const visionElement = document.getElementById('final-company-vision');
+        if (visionElement) {
+            if (this.gameState.company.vision) {
+                visionElement.textContent = `"${this.gameState.company.vision}"`;
+                visionElement.style.display = 'block';
+            } else {
+                visionElement.style.display = 'none';
+            }
+        }
+        
+        // Update specialization
+        const specNames = {
+            mobile: 'Mobile App Development',
+            gaming: 'Game Development',
+            enterprise: 'Enterprise Software',
+            ai: 'AI & Machine Learning'
+        };
+        this.updateElement('final-specialization', specNames[this.gameState.company.specialization] || 'Not Selected');
+        
+        // Update location
+        const locationNames = {
+            'silicon-valley': 'Silicon Valley, CA',
+            'austin': 'Austin, Texas',
+            'bangalore': 'Bangalore, India',
+            'hometown': 'Your Hometown'
+        };
+        this.updateElement('final-location', locationNames[this.gameState.company.location] || 'Not Selected');
+        
+        // Update starting capital
+        const capitalAmounts = {
+            'silicon-valley': 15000,
+            'austin': 10000,
+            'bangalore': 8000,
+            'hometown': 5000
+        };
+        const capital = capitalAmounts[this.gameState.company.location] || 5000;
+        this.updateElement('final-capital', this.formatMoney(capital));
+    }
+
+    launchCompany() {
+        if (!this.validateAllSteps()) return;
+        
+        // Set starting capital based on location
+        const capitalAmounts = {
+            'silicon-valley': 15000,
+            'austin': 10000,
+            'bangalore': 8000,
+            'hometown': 5000
+        };
+        
+        this.gameState.money = capitalAmounts[this.gameState.company.location] || 5000;
+        
+        // Apply specialization bonuses
+        this.applySpecializationBonuses();
+        
+        // Save company data
+        this.saveCompany();
+        
+        // Hide creation and show game
+        const companyCreation = document.getElementById('company-creation');
+        const gameContainer = document.getElementById('game-container');
+        
+        companyCreation.classList.add('hidden');
+        gameContainer.classList.remove('hidden');
+        
+        // Initialize game
+        this.initializeGameUI();
+        this.startGameLoop();
+        
+        this.showNotification(`Welcome to ${this.gameState.company.name}! Your journey begins now.`, 'success');
+    }
+
+    validateAllSteps() {
+        const errors = [];
+        
+        if (!this.gameState.company.founder?.trim()) errors.push('Founder name required');
+        if (!this.gameState.company.name?.trim()) errors.push('Company name required');
+        if (!this.gameState.company.specialization) errors.push('Specialization required');
+        if (!this.gameState.company.location) errors.push('Location required');
+        
+        if (errors.length > 0) {
+            this.showNotification(`Please complete: ${errors.join(', ')}`, 'error');
+            return false;
+        }
+        
+        return true;
+    }
+
+    applySpecializationBonuses() {
+        const bonuses = {
+            mobile: { skill: 'design', bonus: 0.2 },
+            gaming: { skill: 'design', bonus: 0.3 },
+            enterprise: { skill: 'marketing', bonus: 0.2 },
+            ai: { skill: 'research', bonus: 0.4 }
+        };
+        
+        const bonus = bonuses[this.gameState.company.specialization];
+        if (bonus) {
+            // Apply skill bonus
+            this.gameState.skills[bonus.skill].level += Math.floor(bonus.bonus * 10);
+        }
+    }
+
+    // ===============================
+    // GAME UI INITIALIZATION
+    // ===============================
+    
+    initializeGameUI() {
+        // Update header with company info
+        this.updateElement('game-company-name', this.gameState.company.name);
+        this.updateElement('game-founder-title', this.gameState.company.founder + ', CEO');
+        
+        const gameLogo = document.getElementById('game-company-logo');
+        if (gameLogo) {
+            if (this.gameState.company.logo.startsWith('data:image')) {
+                gameLogo.innerHTML = `<img src="${this.gameState.company.logo}" alt="Logo">`;
+            } else {
+                gameLogo.textContent = this.gameState.company.logo;
+            }
+        }
+        
+        // Initialize skills display
+        this.initializeSkillsDisplay();
+        
+        // Initialize software modal
+        this.initializeSoftwareModal();
+        
+        // Initialize market trends
+        this.updateMarketTrends();
+        
+        // Initialize achievements
+        this.updateAchievements();
+        
+        // Update all UI elements
+        this.updateGameUI();
+    }
+
+    initializeSkillsDisplay() {
+        const skillsContainer = document.getElementById('skills-container');
+        if (!skillsContainer) return;
+        
+        skillsContainer.innerHTML = '';
+        
+        Object.entries(this.gameState.skills).forEach(([skillName, skill]) => {
+            const skillElement = document.createElement('div');
+            skillElement.className = 'skill-item';
+            skillElement.innerHTML = `
+                <div class="skill-header">
+                    <span class="skill-name">${this.capitalizeFirst(skillName)}</span>
+                    <span class="skill-level">Lv ${skill.level}</span>
+                </div>
+                <div class="skill-progress">
+                    <div class="skill-progress-bar" style="width: ${(skill.xp / skill.maxXp) * 100}%"></div>
+                </div>
+                <div class="skill-xp">${skill.xp}/${skill.maxXp} XP</div>
+            `;
+            skillsContainer.appendChild(skillElement);
         });
     }
 
-    selectSoftwareType(type) {
-        this.selectedSoftwareType = type;
-        document.getElementById('software-customization').classList.remove('hidden');
-        this.updateDevelopmentCost();
+    initializeSoftwareModal() {
+        const modal = document.getElementById('software-modal');
+        if (!modal) return;
+        
+        const softwareTypesContainer = modal.querySelector('.software-types');
+        if (!softwareTypesContainer) return;
+        
+        softwareTypesContainer.innerHTML = '';
+        
+        Object.entries(this.softwareTypes).forEach(([typeId, type]) => {
+            const typeElement = document.createElement('div');
+            typeElement.className = 'software-type-card';
+            typeElement.dataset.type = typeId;
+            
+            typeElement.innerHTML = `
+                <div class="type-icon">${type.icon}</div>
+                <h3>${type.name}</h3>
+                <div class="type-stats">
+                    <div class="type-stat">
+                        <span class="stat-label">Cost</span>
+                        <span class="stat-value">${this.formatMoney(type.baseCost)}</span>
+                    </div>
+                    <div class="type-stat">
+                        <span class="stat-label">Time</span>
+                        <span class="stat-value">${type.baseTime} days</span>
+                    </div>
+                    <div class="type-stat">
+                        <span class="stat-label">Revenue</span>
+                        <span class="stat-value">${this.formatMoney(type.baseRevenue)}</span>
+                    </div>
+                </div>
+            `;
+            
+            typeElement.addEventListener('click', () => this.selectSoftwareType(typeId));
+            softwareTypesContainer.appendChild(typeElement);
+        });
     }
 
-    updateDevelopmentCost() {
-        if (!this.selectedSoftwareType) return;
-
-        const softwareType = this.softwareTypes[this.selectedSoftwareType];
-        const features = document.querySelectorAll('.feature-checkboxes input:checked');
-        
-        const baseCost = softwareType.baseCost;
-        const featureCost = features.length * 200;
-        const totalCost = baseCost + featureCost;
-        
-        const baseTime = softwareType.baseTime;
-        const featureTime = features.length * 0.5;
-        const totalTime = Math.max(1, baseTime + featureTime - (this.gameState.skills.coding.level * 0.2));
-
-        document.getElementById('dev-cost').textContent = totalCost;
-        document.getElementById('dev-time').textContent = `${totalTime.toFixed(1)} hours`;
-    }
-
-    startDevelopment() {
-        if (!this.selectedSoftwareType) return;
-
-        const softwareType = this.softwareTypes[this.selectedSoftwareType];
-        const features = Array.from(document.querySelectorAll('.feature-checkboxes input:checked')).map(cb => cb.value);
-        const name = document.getElementById('software-name').value || `${softwareType.name} Pro`;
-        
-        const baseCost = softwareType.baseCost;
-        const featureCost = features.length * 200;
-        const totalCost = baseCost + featureCost;
-
-        if (this.gameState.money < totalCost) {
-            this.showNotification("Not enough money!", "error");
-            return;
+    // ===============================
+    // GAME MECHANICS
+    // ===============================
+    
+    startGameLoop() {
+        if (this.gameLoopInterval) {
+            clearInterval(this.gameLoopInterval);
         }
+        
+        this.gameLoopInterval = setInterval(() => {
+            this.gameLoop();
+        }, 1000 / this.gameState.gameSpeed);
+    }
 
-        if (this.gameState.projects.length >= this.gameState.workplace.capacity) {
-            this.showNotification("Workplace at capacity! Upgrade or wait for projects to finish.", "error");
-            return;
+    restartGameLoop() {
+        this.startGameLoop();
+    }
+
+    gameLoop() {
+        // Update active projects
+        this.updateActiveProjects();
+        
+        // Update day counter (every 60 seconds in real time)
+        if (Math.random() < 0.017) { // Roughly 1% chance per second = 1 day per minute
+            this.gameState.dayCount++;
+            this.updateGameUI();
         }
-
-        this.gameState.money -= totalCost;
         
-        const project = {
-            id: Date.now(),
-            name: name,
-            type: this.selectedSoftwareType,
-            features: features,
-            cost: totalCost,
-            progress: 0,
-            timeRemaining: (softwareType.baseTime + features.length * 0.5) * 60, // Convert to seconds
-            quality: this.calculateQuality(features),
-            expectedRevenue: this.calculateExpectedRevenue(softwareType, features)
-        };
-
-        this.gameState.projects.push(project);
-        this.hideSoftwareModal();
-        this.showNotification(`Started developing ${name}!`, "success");
-        this.updateUI();
-    }
-
-    calculateQuality(features) {
-        const baseQuality = 0.5;
-        const featureBonus = features.length * 0.1;
-        const skillBonus = (this.gameState.skills.coding.level + this.gameState.skills.design.level) * 0.05;
-        return Math.min(1.0, baseQuality + featureBonus + skillBonus);
-    }
-
-    calculateExpectedRevenue(softwareType, features) {
-        const baseRevenue = softwareType.baseRevenue;
-        const featureMultiplier = 1 + (features.length * 0.2);
-        const qualityMultiplier = this.calculateQuality(features);
-        const marketMultiplier = softwareType.marketDemand;
+        // Auto-save periodically
+        const now = Date.now();
+        if (this.gameState.settings.autoSave && (now - this.lastSaveTime) > 30000) { // 30 seconds
+            this.saveGame(false); // Silent save
+            this.lastSaveTime = now;
+        }
         
-        return Math.floor(baseRevenue * featureMultiplier * qualityMultiplier * marketMultiplier);
+        // Check for achievements
+        this.checkAchievements();
+        
+        // Update UI
+        this.updateGameUI();
     }
 
-    // Project Management
-    updateProjects() {
-        this.gameState.projects.forEach((project, index) => {
+    updateActiveProjects() {
+        this.gameState.activeProjects.forEach((project, index) => {
             if (project.timeRemaining > 0) {
-                const speed = this.gameState.hardware.speed * this.gameState.workplace.speed;
-                const employeeBonus = 1 + (this.getTotalEmployees() * 0.1);
-                
-                project.timeRemaining -= speed * employeeBonus;
-                project.progress = Math.min(100, ((project.timeRemaining <= 0) ? 100 : 
-                    (1 - project.timeRemaining / (this.softwareTypes[project.type].baseTime * 60)) * 100));
+                project.timeRemaining -= this.gameState.gameSpeed;
+                project.progress = Math.min(100, ((project.totalTime - project.timeRemaining) / project.totalTime) * 100);
                 
                 if (project.timeRemaining <= 0) {
                     this.completeProject(project, index);
                 }
             }
         });
+        
+        this.updateProjectsDisplay();
     }
 
     completeProject(project, index) {
-        const success = Math.random() < project.quality;
+        // Calculate final revenue
+        const baseRevenue = project.expectedRevenue;
+        const skillMultiplier = this.getSkillMultiplier(project.type);
+        const marketMultiplier = this.gameState.marketTrends[project.type]?.demand || 1;
+        const finalRevenue = Math.floor(baseRevenue * skillMultiplier * marketMultiplier * (0.8 + Math.random() * 0.4));
         
-        if (success) {
-            const revenue = project.expectedRevenue + (Math.random() * 0.4 - 0.2) * project.expectedRevenue;
-            this.gameState.money += revenue;
-            this.gameState.totalRevenue += revenue;
-            this.gameState.reputation += Math.floor(project.quality * 10);
-            this.gameState.statistics.successfulProjects++;
+        // Add money and update stats
+        this.gameState.money += finalRevenue;
+        this.gameState.totalRevenue += finalRevenue;
+        this.gameState.reputation += Math.floor(finalRevenue / 1000);
+        
+        // Add to completed projects
+        const completedProject = {
+            ...project,
+            completedAt: new Date(),
+            finalRevenue: finalRevenue
+        };
+        this.gameState.completedProjects.push(completedProject);
+        
+        // Remove from active projects
+        this.gameState.activeProjects.splice(index, 1);
+        
+        // Gain skill XP
+        this.gainSkillXP(project.type, 20);
+        
+        // Show notification
+        this.showNotification(
+            `${project.name} completed! Earned ${this.formatMoney(finalRevenue)}`,
+            'success'
+        );
+    }
+
+    getSkillMultiplier(projectType) {
+        const relevantSkills = {
+            mobile: ['coding', 'design'],
+            web: ['coding', 'design'],
+            desktop: ['coding'],
+            game: ['coding', 'design'],
+            ai: ['coding', 'research']
+        };
+        
+        const skills = relevantSkills[projectType] || ['coding'];
+        const avgLevel = skills.reduce((sum, skill) => sum + this.gameState.skills[skill].level, 0) / skills.length;
+        
+        return 1 + (avgLevel - 1) * 0.1; // 10% bonus per skill level
+    }
+
+    gainSkillXP(projectType, baseXP) {
+        const relevantSkills = {
+            mobile: ['coding', 'design'],
+            web: ['coding', 'design'],
+            desktop: ['coding'],
+            game: ['coding', 'design'],
+            ai: ['coding', 'research']
+        };
+        
+        const skills = relevantSkills[projectType] || ['coding'];
+        
+        skills.forEach(skillName => {
+            const skill = this.gameState.skills[skillName];
+            skill.xp += baseXP;
             
-            // Add to passive income
-            this.gameState.statistics.passiveIncome += Math.floor(revenue * 0.01);
+            // Level up if enough XP
+            while (skill.xp >= skill.maxXp) {
+                skill.xp -= skill.maxXp;
+                skill.level++;
+                skill.maxXp = Math.floor(skill.maxXp * 1.2); // Increase XP requirement
+                
+                this.showNotification(
+                    `${this.capitalizeFirst(skillName)} leveled up to ${skill.level}!`,
+                    'achievement'
+                );
+            }
+        });
+        
+        this.initializeSkillsDisplay();
+    }
+
+    // ===============================
+    // GAME ACTIONS
+    // ===============================
+    
+    selectSoftwareType(typeId) {
+        const type = this.softwareTypes[typeId];
+        if (!type) return;
+        
+        // Update visual selection
+        document.querySelectorAll('.software-type-card').forEach(card => {
+            card.classList.toggle('selected', card.dataset.type === typeId);
+        });
+        
+        // Show project details
+        const projectDetails = document.getElementById('project-details');
+        if (projectDetails) {
+            projectDetails.classList.remove('hidden');
             
-            this.showNotification(`${project.name} launched successfully! Earned $${this.formatNumber(revenue)}`, "success");
+            // Initialize features
+            this.initializeFeatures(type);
             
-            // Gain XP
-            this.gainSkillXP('coding', 10 + project.features.length * 2);
-            this.gainSkillXP('design', 5 + project.features.length);
-        } else {
-            this.showNotification(`${project.name} failed to launch. Better luck next time!`, "error");
-            this.gainSkillXP('coding', 5);
+            // Update project summary
+            this.updateProjectSummary(typeId);
         }
         
-        this.gameState.statistics.projectsCompleted++;
-        this.gameState.projects.splice(index, 1);
+        // Store selected type
+        this.selectedSoftwareType = typeId;
     }
 
-    // Skill System
-    gainSkillXP(skill, amount) {
-        if (!this.gameState.skills[skill]) return;
+    initializeFeatures(type) {
+        const featuresGrid = document.getElementById('features-grid');
+        if (!featuresGrid) return;
         
-        this.gameState.skills[skill].xp += amount;
-        const requiredXP = this.gameState.skills[skill].level * 100;
+        featuresGrid.innerHTML = '';
         
-        if (this.gameState.skills[skill].xp >= requiredXP) {
-            this.gameState.skills[skill].level++;
-            this.gameState.skills[skill].xp -= requiredXP;
-            this.showNotification(`${skill.charAt(0).toUpperCase() + skill.slice(1)} skill increased to level ${this.gameState.skills[skill].level}!`, "success");
-        }
+        type.features.forEach(feature => {
+            const featureElement = document.createElement('div');
+            featureElement.className = 'feature-item';
+            featureElement.innerHTML = `
+                <input type="checkbox" id="feature-${feature.replace(/\s+/g, '-').toLowerCase()}" value="${feature}">
+                <label for="feature-${feature.replace(/\s+/g, '-').toLowerCase()}">${feature}</label>
+            `;
+            
+            const checkbox = featureElement.querySelector('input');
+            checkbox.addEventListener('change', () => this.updateProjectSummary(this.selectedSoftwareType));
+            
+            featuresGrid.appendChild(featureElement);
+        });
     }
 
-    // Workplace Management
-    upgradeWorkplace() {
-        const nextLevel = this.gameState.workplace.level + 1;
-        if (nextLevel >= this.workplaces.length) {
-            this.showNotification("Already at maximum workplace level!", "info");
-            return;
-        }
-
-        const nextWorkplace = this.workplaces[nextLevel];
-        if (this.gameState.money < nextWorkplace.cost) {
-            this.showNotification(`Need $${this.formatNumber(nextWorkplace.cost)} to upgrade!`, "error");
-            return;
-        }
-
-        this.gameState.money -= nextWorkplace.cost;
-        this.gameState.workplace.level = nextLevel;
-        this.gameState.workplace.name = nextWorkplace.name;
-        this.gameState.workplace.capacity = nextWorkplace.capacity;
-        this.gameState.workplace.speed = nextWorkplace.speed;
-        this.gameState.workplace.cost = this.workplaces[nextLevel + 1]?.cost || 0;
-
-        this.showNotification(`Upgraded to ${nextWorkplace.name}!`, "success");
-        this.updateUI();
-    }
-
-    // Hardware Management
-    upgradeHardware() {
-        const nextLevel = this.gameState.hardware.level + 1;
-        if (nextLevel >= this.hardwareTypes.length) {
-            this.showNotification("Already have the best hardware!", "info");
-            return;
-        }
-
-        const nextHardware = this.hardwareTypes[nextLevel];
-        if (this.gameState.money < nextHardware.cost) {
-            this.showNotification(`Need $${this.formatNumber(nextHardware.cost)} to upgrade!`, "error");
-            return;
-        }
-
-        this.gameState.money -= nextHardware.cost;
-        this.gameState.hardware.level = nextLevel;
-        this.gameState.hardware.name = nextHardware.name;
-        this.gameState.hardware.speed = nextHardware.speed;
-        this.gameState.hardware.cost = this.hardwareTypes[nextLevel + 1]?.cost || 0;
-
-        this.showNotification(`Upgraded to ${nextHardware.name}!`, "success");
-        this.updateUI();
-    }
-
-    // Employee Management
-    showHireModal() {
-        // Simple hiring for now - can be expanded to full modal
-        const cost = 2000 + (this.getTotalEmployees() * 500);
+    updateProjectSummary(typeId) {
+        const type = this.softwareTypes[typeId];
+        if (!type) return;
         
+        // Get selected features
+        const selectedFeatures = Array.from(document.querySelectorAll('#features-grid input:checked')).length;
+        
+        // Calculate costs and time
+        const featureMultiplier = 1 + (selectedFeatures * 0.2);
+        const devTime = Math.ceil(type.baseTime * featureMultiplier);
+        const devCost = Math.floor(type.baseCost * featureMultiplier);
+        const expectedRevenue = Math.floor(type.baseRevenue * featureMultiplier);
+        
+        // Update display
+        this.updateElement('dev-time', devTime + ' days');
+        this.updateElement('dev-cost', this.formatMoney(devCost));
+        this.updateElement('expected-revenue', this.formatMoney(expectedRevenue));
+        
+        // Store values for project creation
+        this.projectSummary = {
+            type: typeId,
+            devTime,
+            devCost,
+            expectedRevenue
+        };
+    }
+
+    startDevelopment() {
+        if (!this.selectedSoftwareType || !this.projectSummary) {
+            this.showNotification('Please select a software type and configure features', 'error');
+            return;
+        }
+        
+        const projectName = document.getElementById('project-name')?.value.trim();
+        if (!projectName) {
+            this.showNotification('Please enter a project name', 'error');
+            return;
+        }
+        
+        if (this.gameState.money < this.projectSummary.devCost) {
+            this.showNotification('Not enough money to start development', 'error');
+            return;
+        }
+        
+        // Deduct cost
+        this.gameState.money -= this.projectSummary.devCost;
+        
+        // Create project
+        const project = {
+            id: Date.now(),
+            name: projectName,
+            type: this.selectedSoftwareType,
+            totalTime: this.projectSummary.devTime,
+            timeRemaining: this.projectSummary.devTime,
+            progress: 0,
+            expectedRevenue: this.projectSummary.expectedRevenue,
+            features: Array.from(document.querySelectorAll('#features-grid input:checked')).map(cb => cb.value),
+            startedAt: new Date()
+        };
+        
+        this.gameState.activeProjects.push(project);
+        
+        // Hide modal
+        this.hideModal('software-modal');
+        
+        // Show notification
+        this.showNotification(`Started development of ${projectName}!`, 'success');
+        
+        // Switch to projects view
+        this.showProjectsScreen();
+        
+        // Update UI
+        this.updateGameUI();
+    }
+
+    hireEmployee() {
+        const cost = 2000;
         if (this.gameState.money < cost) {
-            this.showNotification(`Need $${this.formatNumber(cost)} to hire an employee!`, "error");
+            this.showNotification('Need $2,000 to hire an employee', 'error');
             return;
         }
-
+        
         this.gameState.money -= cost;
+        this.gameState.employees.developers++;
         
-        // Randomly hire different types
-        const types = ['programmers', 'designers', 'marketers', 'testers'];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        this.gameState.employees[randomType]++;
-        
-        this.showNotification(`Hired a ${randomType.slice(0, -1)}!`, "success");
-        this.updateUI();
+        this.showNotification('Hired a developer! Your team is growing.', 'success');
+        this.updateGameUI();
     }
 
-    getTotalEmployees() {
-        return Object.values(this.gameState.employees).reduce((sum, count) => sum + count, 0) + 1; // +1 for player
+    upgradeOffice() {
+        const cost = this.gameState.workplace.upgradeCost;
+        if (this.gameState.money < cost) {
+            this.showNotification(`Need ${this.formatMoney(cost)} to upgrade office`, 'error');
+            return;
+        }
+        
+        const workplaces = [
+            { name: 'Garage', capacity: 1, efficiency: 1.0, upgradeCost: 10000 },
+            { name: 'Small Office', capacity: 5, efficiency: 1.2, upgradeCost: 50000 },
+            { name: 'Startup Hub', capacity: 15, efficiency: 1.5, upgradeCost: 200000 },
+            { name: 'Corporate HQ', capacity: 50, efficiency: 2.0, upgradeCost: 1000000 },
+            { name: 'Global Campus', capacity: 200, efficiency: 3.0, upgradeCost: 0 }
+        ];
+        
+        if (this.gameState.workplace.level < workplaces.length - 1) {
+            this.gameState.money -= cost;
+            this.gameState.workplace.level++;
+            this.gameState.workspace = workplaces[this.gameState.workplace.level];
+            
+            this.showNotification(`Upgraded to ${this.gameState.workplace.name}!`, 'success');
+            this.updateGameUI();
+        } else {
+            this.showNotification('Already at maximum office level!', 'info');
+        }
     }
 
-    // Marketing
     runMarketingCampaign() {
         const cost = 1000;
-        
         if (this.gameState.money < cost) {
-            this.showNotification("Need $1,000 for marketing campaign!", "error");
+            this.showNotification('Need $1,000 for marketing campaign', 'error');
             return;
         }
-
+        
         this.gameState.money -= cost;
+        const reputationGain = Math.floor(Math.random() * 30) + 15;
+        this.gameState.reputation += reputationGain;
         
-        // Random marketing success
-        const success = Math.random() < 0.7;
-        if (success) {
-            const reputationGain = Math.floor(Math.random() * 20) + 10;
-            this.gameState.reputation += reputationGain;
-            this.showNotification(`Marketing campaign successful! Gained ${reputationGain} reputation.`, "success");
-            this.gainSkillXP('marketing', 15);
+        this.gainSkillXP('marketing', 10);
+        
+        this.showNotification(`Marketing campaign successful! Gained ${reputationGain} reputation.`, 'success');
+        this.updateGameUI();
+    }
+
+    // ===============================
+    // UI UPDATES
+    // ===============================
+    
+    updateGameUI() {
+        // Update resources
+        this.updateElement('money-display', this.formatMoney(this.gameState.money));
+        this.updateElement('reputation-display', this.formatNumber(this.gameState.reputation));
+        this.updateElement('legacy-display', this.formatNumber(this.gameState.legacyPoints));
+        
+        // Update game stats
+        this.updateElement('game-day', `Day ${this.gameState.dayCount}`);
+        
+        // Update company stats
+        this.updateElement('workplace-level', this.gameState.workplace.name);
+        this.updateElement('employee-count', this.getTotalEmployees());
+        this.updateElement('active-projects', this.gameState.activeProjects.length);
+        this.updateElement('completed-projects', this.gameState.completedProjects.length);
+        
+        // Update footer stats
+        this.updateElement('total-revenue', this.formatMoney(this.gameState.totalRevenue));
+        this.updateElement('team-size', this.getTotalEmployees());
+        
+        const successRate = this.gameState.completedProjects.length > 0 
+            ? Math.floor((this.gameState.completedProjects.length / (this.gameState.completedProjects.length + this.gameState.activeProjects.length)) * 100)
+            : 100;
+        this.updateElement('success-rate', successRate + '%');
+    }
+
+    updateProjectsDisplay() {
+        const projectsList = document.getElementById('projects-list');
+        if (!projectsList) return;
+        
+        if (this.gameState.activeProjects.length === 0) {
+            projectsList.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📂</div>
+                    <h3>No Active Projects</h3>
+                    <p>Start developing your first software to begin your empire!</p>
+                    <button class="start-project-btn" onclick="game.showModal('software-modal')">Create Your First Project</button>
+                </div>
+            `;
         } else {
-            this.showNotification("Marketing campaign had mixed results.", "info");
-            this.gainSkillXP('marketing', 5);
-        }
-        
-        this.updateUI();
-    }
-
-    // Passive Income
-    generatePassiveIncome() {
-        if (this.gameState.statistics.passiveIncome > 0) {
-            const income = Math.floor(this.gameState.statistics.passiveIncome / 60); // Per second
-            this.gameState.money += income;
-            this.gameState.totalRevenue += income;
-        }
-    }
-
-    // Market Trends
-    updateMarketTrends() {
-        // Randomly update market trends every 30 seconds
-        if (Math.random() < 0.01) {
-            this.marketTrends.forEach(trend => {
-                const change = (Math.random() - 0.5) * 0.2;
-                trend.demand = Math.max(0.3, Math.min(2.0, trend.demand + change));
-                
-                if (trend.demand > 1.3) trend.trend = "hot";
-                else if (trend.demand > 1.1) trend.trend = "rising";
-                else if (trend.demand > 0.8) trend.trend = "stable";
-                else trend.trend = "declining";
+            projectsList.innerHTML = '';
+            
+            this.gameState.activeProjects.forEach(project => {
+                const projectElement = document.createElement('div');
+                projectElement.className = 'project-card';
+                projectElement.innerHTML = `
+                    <div class="project-header">
+                        <div class="project-icon">${this.softwareTypes[project.type]?.icon || '💻'}</div>
+                        <div class="project-info">
+                            <h3>${project.name}</h3>
+                            <p>${this.softwareTypes[project.type]?.name || 'Software'}</p>
+                        </div>
+                    </div>
+                    <div class="project-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${project.progress}%"></div>
+                        </div>
+                        <div class="progress-text">${Math.floor(project.progress)}% Complete</div>
+                    </div>
+                    <div class="project-stats">
+                        <div class="project-stat">
+                            <span class="stat-label">Time Remaining</span>
+                            <span class="stat-value">${Math.ceil(project.timeRemaining)} days</span>
+                        </div>
+                        <div class="project-stat">
+                            <span class="stat-label">Expected Revenue</span>
+                            <span class="stat-value">${this.formatMoney(project.expectedRevenue)}</span>
+                        </div>
+                    </div>
+                `;
+                projectsList.appendChild(projectElement);
             });
         }
     }
 
-    // Achievements
+    updateMarketTrends() {
+        const trendsContainer = document.getElementById('market-trends');
+        if (!trendsContainer) return;
+        
+        trendsContainer.innerHTML = '';
+        
+        Object.entries(this.gameState.marketTrends).forEach(([market, data]) => {
+            const trendElement = document.createElement('div');
+            trendElement.className = 'market-trend-item';
+            
+            const trendIcon = data.trend === 'up' ? '📈' : data.trend === 'down' ? '📉' : '➡️';
+            const trendClass = data.trend === 'up' ? 'positive' : data.trend === 'down' ? 'negative' : 'neutral';
+            
+            trendElement.innerHTML = `
+                <div class="trend-info">
+                    <span class="trend-name">${this.capitalizeFirst(market)}</span>
+                    <span class="trend-indicator ${trendClass}">${trendIcon}</span>
+                </div>
+                <div class="trend-demand">Demand: ${data.demand.toFixed(1)}x</div>
+            `;
+            
+            trendsContainer.appendChild(trendElement);
+        });
+    }
+
     checkAchievements() {
         this.achievementsList.forEach(achievement => {
             if (!this.gameState.achievements.includes(achievement.id) && achievement.condition()) {
-                this.gameState.achievements.push(achievement.id);
-                this.showNotification(`Achievement unlocked: ${achievement.name}!`, "achievement");
+                this.unlockAchievement(achievement);
             }
         });
     }
 
-    // UI Updates
-    updateUI() {
-        // Money and reputation
-        document.getElementById('money-amount').textContent = `$${this.formatNumber(this.gameState.money)}`;
-        document.getElementById('reputation-amount').textContent = this.formatNumber(this.gameState.reputation);
-
-        // Player info
-        document.getElementById('company-name').textContent = this.gameState.companyName;
-        document.getElementById('workplace-level').textContent = this.gameState.workplace.name;
-        document.getElementById('employee-count').textContent = this.getTotalEmployees();
-        document.getElementById('project-count').textContent = this.gameState.projects.length;
-
-        // Skills
-        this.updateSkillDisplay('coding');
-        this.updateSkillDisplay('marketing');
-        this.updateSkillDisplay('design');
-
-        // Hardware
-        document.getElementById('hardware-type').textContent = this.gameState.hardware.name;
-        const hardwareBtn = document.getElementById('upgrade-hardware-btn');
-        if (this.gameState.hardware.level < this.hardwareTypes.length - 1) {
-            hardwareBtn.textContent = `Upgrade ($${this.formatNumber(this.gameState.hardware.cost)})`;
-            hardwareBtn.disabled = this.gameState.money < this.gameState.hardware.cost;
-        } else {
-            hardwareBtn.textContent = "Max Level";
-            hardwareBtn.disabled = true;
-        }
-
-        // Workplace upgrade button
-        const workplaceBtn = document.getElementById('upgrade-workplace-btn');
-        if (this.gameState.workplace.level < this.workplaces.length - 1) {
-            workplaceBtn.textContent = `Upgrade Workplace ($${this.formatNumber(this.gameState.workplace.cost)})`;
-            workplaceBtn.disabled = this.gameState.money < this.gameState.workplace.cost;
-        } else {
-            workplaceBtn.textContent = "Max Level";
-            workplaceBtn.disabled = true;
-        }
-
-        // Employee hire button
-        const hireBtn = document.getElementById('hire-employee-btn');
-        const hireCost = 2000 + (this.getTotalEmployees() * 500);
-        hireBtn.innerHTML = `<span class="btn-icon">👥</span><span class="btn-text">Hire Employee</span><span class="btn-cost">$${this.formatNumber(hireCost)}</span>`;
-        hireBtn.disabled = this.gameState.money < hireCost;
-
-        // Projects list
-        this.updateProjectsList();
-
-        // Footer stats
-        document.getElementById('passive-income').textContent = `$${this.formatNumber(this.gameState.statistics.passiveIncome)}/min`;
-        document.getElementById('total-revenue').textContent = `$${this.formatNumber(this.gameState.totalRevenue)}`;
-        const successRate = this.gameState.statistics.projectsCompleted > 0 ? 
-            Math.floor((this.gameState.statistics.successfulProjects / this.gameState.statistics.projectsCompleted) * 100) : 0;
-        document.getElementById('success-rate').textContent = `${successRate}%`;
-
-        // Leaderboard position
-        const playerWorth = this.gameState.totalRevenue;
-        let rank = 999;
-        if (playerWorth >= 50000000) rank = 1;
-        else if (playerWorth >= 35000000) rank = 2;
-        else if (playerWorth >= 28000000) rank = 3;
-        else if (playerWorth >= 1000000) rank = Math.floor(Math.random() * 50) + 10;
-        else if (playerWorth >= 100000) rank = Math.floor(Math.random() * 200) + 100;
+    unlockAchievement(achievement) {
+        this.gameState.achievements.push(achievement.id);
         
-        document.getElementById('player-rank').textContent = `${rank}.`;
-        document.getElementById('player-company').textContent = this.gameState.companyName;
-        document.getElementById('player-worth').textContent = `$${this.formatNumber(playerWorth)}`;
-
-        // Update achievements display
-        this.updateAchievementsDisplay();
+        // Apply rewards
+        if (achievement.reward.money) {
+            this.gameState.money += achievement.reward.money;
+        }
+        if (achievement.reward.reputation) {
+            this.gameState.reputation += achievement.reward.reputation;
+        }
+        
+        // Show notification
+        this.showNotification(
+            `🏆 Achievement Unlocked: ${achievement.name}! ${achievement.reward.money ? '+$' + achievement.reward.money : ''}`,
+            'achievement'
+        );
+        
+        this.updateAchievements();
     }
 
-    updateSkillDisplay(skillName) {
-        const skill = this.gameState.skills[skillName];
-        const progressPercent = (skill.xp / (skill.level * 100)) * 100;
-        
-        document.getElementById(`${skillName}-skill`).style.width = `${progressPercent}%`;
-        document.getElementById(`${skillName}-level`).textContent = skill.level;
-    }
-
-    updateProjectsList() {
-        const projectsList = document.getElementById('projects-list');
-        
-        if (this.gameState.projects.length === 0) {
-            projectsList.innerHTML = '<div class="no-projects">No active projects. Start developing!</div>';
-            return;
-        }
-
-        projectsList.innerHTML = this.gameState.projects.map(project => `
-            <div class="project-item">
-                <div class="project-header">
-                    <span class="project-name">${project.name}</span>
-                    <span class="project-type">${this.softwareTypes[project.type].name}</span>
-                </div>
-                <div class="project-progress-bar">
-                    <div class="project-progress" style="width: ${project.progress}%"></div>
-                </div>
-                <div class="project-details">
-                    <span>Progress: ${Math.floor(project.progress)}%</span>
-                    <span>Expected: $${this.formatNumber(project.expectedRevenue)}</span>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    updateAchievementsDisplay() {
+    updateAchievements() {
         const achievementsList = document.getElementById('achievements-list');
+        if (!achievementsList) return;
         
-        achievementsList.innerHTML = this.achievementsList.map(achievement => {
-            const unlocked = this.gameState.achievements.includes(achievement.id);
-            return `
-                <div class="achievement-item ${unlocked ? 'unlocked' : 'locked'}">
-                    <span class="achievement-icon">${unlocked ? '🏆' : '🔒'}</span>
+        achievementsList.innerHTML = '';
+        
+        this.achievementsList.slice(0, 5).forEach(achievement => {
+            const isUnlocked = this.gameState.achievements.includes(achievement.id);
+            
+            const achievementElement = document.createElement('div');
+            achievementElement.className = `achievement ${isUnlocked ? 'unlocked' : 'locked'}`;
+            achievementElement.innerHTML = `
+                <span class="achievement-icon">${achievement.icon}</span>
+                <div class="achievement-info">
                     <span class="achievement-name">${achievement.name}</span>
+                    <span class="achievement-desc">${achievement.description}</span>
                 </div>
+                ${isUnlocked ? '<span class="achievement-status">✓</span>' : ''}
             `;
-        }).join('');
+            
+            achievementsList.appendChild(achievementElement);
+        });
     }
 
-    // Settings
-    showSettingsModal() {
-        document.getElementById('settings-modal').classList.remove('hidden');
-        document.getElementById('company-name-input').value = this.gameState.companyName;
-        document.getElementById('auto-save').checked = this.gameState.settings.autoSave;
-        document.getElementById('sound-effects').checked = this.gameState.settings.soundEffects;
-        document.getElementById('notifications').checked = this.gameState.settings.notifications;
-    }
-
-    hideSettingsModal() {
-        document.getElementById('settings-modal').classList.add('hidden');
-    }
-
-    saveSettings() {
-        this.gameState.companyName = document.getElementById('company-name-input').value;
-        this.gameState.settings.autoSave = document.getElementById('auto-save').checked;
-        this.gameState.settings.soundEffects = document.getElementById('sound-effects').checked;
-        this.gameState.settings.notifications = document.getElementById('notifications').checked;
+    showProjectsScreen() {
+        // Hide all panels
+        document.querySelectorAll('.content-panel').forEach(panel => {
+            panel.classList.remove('active');
+        });
         
-        this.hideSettingsModal();
-        this.saveGame();
-        this.showNotification("Settings saved!", "success");
-        this.updateUI();
+        // Show projects panel
+        const projectsScreen = document.getElementById('projects-screen');
+        if (projectsScreen) {
+            projectsScreen.classList.add('active');
+        }
+        
+        this.updateProjectsDisplay();
     }
 
-    // Notifications
-    showNotification(message, type = 'info') {
-        if (!this.gameState.settings.notifications) return;
-        
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <span class="notification-icon">${this.getNotificationIcon(type)}</span>
-            <span class="notification-text">${message}</span>
-        `;
-        
-        document.getElementById('notifications').appendChild(notification);
-        
-        // Auto remove after 3 seconds
-        setTimeout(() => {
-            notification.remove();
-        }, 3000);
+    // ===============================
+    // MODAL MANAGEMENT
+    // ===============================
+    
+    showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('hidden');
+            
+            // Focus trap for accessibility
+            const focusableElements = modal.querySelectorAll('button, input, select, textarea');
+            if (focusableElements.length > 0) {
+                focusableElements[0].focus();
+            }
+        }
     }
 
-    getNotificationIcon(type) {
-        const icons = {
-            success: '✅',
-            error: '❌',
-            info: 'ℹ️',
-            achievement: '🏆'
-        };
-        return icons[type] || icons.info;
+    hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('hidden');
+            
+            // Reset software modal state
+            if (modalId === 'software-modal') {
+                this.selectedSoftwareType = null;
+                this.projectSummary = null;
+                
+                const projectDetails = document.getElementById('project-details');
+                if (projectDetails) {
+                    projectDetails.classList.add('hidden');
+                }
+                
+                const projectNameInput = document.getElementById('project-name');
+                if (projectNameInput) {
+                    projectNameInput.value = '';
+                }
+                
+                document.querySelectorAll('.software-type-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+            }
+        }
     }
 
-    // Save/Load System
-    saveGame() {
+    // ===============================
+    // DATA MANAGEMENT
+    // ===============================
+    
+    saveGame(showNotification = false) {
         try {
-            localStorage.setItem('softwareTycoonSave', JSON.stringify(this.gameState));
-            this.showNotification("Game saved!", "success");
+            const saveData = {
+                ...this.gameState,
+                version: this.version,
+                savedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('softwareTycoon_save', JSON.stringify(saveData));
+            
+            if (showNotification) {
+                this.showNotification('Game saved successfully!', 'success');
+            }
+            
+            console.log('Game saved' + (showNotification ? ' (with notification)' : ' (silently)'));
         } catch (error) {
-            this.showNotification("Failed to save game!", "error");
+            console.error('Save failed:', error);
+            this.showNotification('Failed to save game!', 'error');
         }
     }
 
     loadGame() {
         try {
-            const savedGame = localStorage.getItem('softwareTycoonSave');
-            if (savedGame) {
-                const loadedState = JSON.parse(savedGame);
-                
-                // Merge saved state with default state to handle new properties
+            const savedData = localStorage.getItem('softwareTycoon_save');
+            if (savedData) {
+                const loadedState = JSON.parse(savedData);
                 this.gameState = { ...this.gameState, ...loadedState };
-                
-                // Ensure all nested objects exist
-                this.gameState.skills = { ...this.gameState.skills, ...loadedState.skills };
-                this.gameState.employees = { ...this.gameState.employees, ...loadedState.employees };
-                this.gameState.settings = { ...this.gameState.settings, ...loadedState.settings };
-                this.gameState.statistics = { ...this.gameState.statistics, ...loadedState.statistics };
-                
-                this.showNotification("Game loaded!", "success");
+                console.log('Game loaded successfully');
             }
         } catch (error) {
-            this.showNotification("Failed to load game!", "error");
+            console.error('Load failed:', error);
+            console.log('Starting fresh game...');
         }
+    }
+
+    saveCompany() {
+        try {
+            localStorage.setItem('softwareTycoon_company', JSON.stringify(this.gameState.company));
+        } catch (error) {
+            console.error('Failed to save company:', error);
+        }
+    }
+
+    saveSettings() {
+        try {
+            localStorage.setItem('softwareTycoon_settings', JSON.stringify(this.gameState.settings));
+        } catch (error) {
+            console.error('Failed to save settings:', error);
+        }
+    }
+
+    exportSave() {
+        try {
+            const saveData = {
+                ...this.gameState,
+                version: this.version,
+                exportedAt: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(saveData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `software-tycoon-save-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            this.showNotification('Save file exported!', 'success');
+        } catch (error) {
+            console.error('Export failed:', error);
+            this.showNotification('Failed to export save!', 'error');
+        }
+    }
+
+    importSave() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const saveData = JSON.parse(e.target.result);
+                        this.gameState = { ...this.gameState, ...saveData };
+                        this.saveGame();
+                        this.updateGameUI();
+                        this.showNotification('Save file imported!', 'success');
+                    } catch (error) {
+                        console.error('Import failed:', error);
+                        this.showNotification('Invalid save file!', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        };
+        
+        input.click();
     }
 
     resetGame() {
-        if (confirm("Are you sure you want to reset your progress? This cannot be undone!")) {
-            localStorage.removeItem('softwareTycoonSave');
-            location.reload();
+        if (confirm('Are you sure you want to reset your game? This cannot be undone!')) {
+            localStorage.removeItem('softwareTycoon_save');
+            localStorage.removeItem('softwareTycoon_company');
+            localStorage.removeItem('softwareTycoon_settings');
+            
+            this.showNotification('Game reset! Refreshing page...', 'info');
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
         }
     }
 
-    // Utility Functions
+    // ===============================
+    // UTILITIES
+    // ===============================
+    
+    showNotification(message, type = 'info') {
+        if (!this.gameState.settings.notifications && type === 'info') return;
+        
+        const container = document.getElementById('notifications');
+        if (!container) return;
+        
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        const icons = {
+            success: '✅',
+            error: '❌',
+            info: 'ℹ️',
+            achievement: '🏆',
+            warning: '⚠️'
+        };
+        
+        notification.innerHTML = `
+            <span class="notification-icon">${icons[type] || icons.info}</span>
+            <span class="notification-message">${message}</span>
+        `;
+        
+        container.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => notification.classList.add('show'), 10);
+        
+        // Auto remove
+        const delay = type === 'achievement' ? 6000 : type === 'error' ? 5000 : 3000;
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, delay);
+    }
+
+    showHelp() {
+        this.showNotification('Help system coming soon! For now, explore and experiment!', 'info');
+    }
+
+    updateElement(id, content) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = content;
+        }
+    }
+
+    formatMoney(amount) {
+        if (amount >= 1000000000) {
+            return '$' + (amount / 1000000000).toFixed(1) + 'B';
+        } else if (amount >= 1000000) {
+            return '$' + (amount / 1000000).toFixed(1) + 'M';
+        } else if (amount >= 1000) {
+            return '$' + (amount / 1000).toFixed(1) + 'K';
+        }
+        return '$' + Math.floor(amount).toLocaleString();
+    }
+
     formatNumber(num) {
-        if (num >= 1000000000) {
-            return (num / 1000000000).toFixed(1) + 'B';
-        } else if (num >= 1000000) {
+        if (num >= 1000000) {
             return (num / 1000000).toFixed(1) + 'M';
         } else if (num >= 1000) {
             return (num / 1000).toFixed(1) + 'K';
         }
-        return num.toLocaleString();
+        return num.toString();
     }
 
-    // Mini-games (expandable)
-    startDebugGame() {
-        // Debug mini-game implementation
-        this.showNotification("Debug challenge coming soon!", "info");
+    capitalizeFirst(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    startMarketingGame() {
-        // Marketing choice mini-game implementation
-        this.showNotification("Marketing challenge coming soon!", "info");
+    getTotalEmployees() {
+        return Object.values(this.gameState.employees).reduce((sum, count) => sum + count, 0) + 1; // +1 for founder
     }
 }
 
-// Initialize game when DOM is loaded
+// ===============================
+// INITIALIZATION
+// ===============================
+
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 Software Tycoon v2.1.0 - AL Software Studio');
+    console.log('Last Updated: 30 August 2025');
+    console.log('🔧 Complete rebuild with bug fixes and new features');
+    
+    // Initialize game
     window.game = new SoftwareTycoon();
     
-    // Feature selection update listener
-    document.addEventListener('change', (e) => {
-        if (e.target.matches('.feature-checkboxes input')) {
-            window.game.updateDevelopmentCost();
-        }
-    });
+    // PWA Install Prompt
+    let deferredPrompt;
     
-    // Prevent context menu on long press (mobile)
-    document.addEventListener('contextmenu', (e) => {
+    window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
-    });
-    
-    // Handle visibility change for idle calculations
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden && window.game) {
-            // Calculate offline earnings when returning to game
-            const offlineTime = Date.now() - (window.game.lastSaveTime || Date.now());
-            if (offlineTime > 60000) { // More than 1 minute offline
-                const offlineEarnings = Math.floor((offlineTime / 60000) * window.game.gameState.statistics.passiveIncome);
-                if (offlineEarnings > 0) {
-                    window.game.gameState.money += offlineEarnings;
-                    window.game.gameState.totalRevenue += offlineEarnings;
-                    window.game.showNotification(`Welcome back! Earned $${window.game.formatNumber(offlineEarnings)} while away.`, "success");
-                }
+        deferredPrompt = e;
+        
+        const installPrompt = document.getElementById('install-prompt');
+        if (installPrompt) {
+            installPrompt.classList.remove('hidden');
+            
+            const installBtn = document.getElementById('install-app');
+            const dismissBtn = document.getElementById('dismiss-install');
+            
+            if (installBtn) {
+                installBtn.addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+                        
+                        if (outcome === 'accepted') {
+                            window.game.showNotification('App installed successfully!', 'success');
+                        }
+                        
+                        deferredPrompt = null;
+                        installPrompt.classList.add('hidden');
+                    }
+                });
             }
-        } else if (window.game) {
-            window.game.lastSaveTime = Date.now();
-            window.game.saveGame();
+            
+            if (dismissBtn) {
+                dismissBtn.addEventListener('click', () => {
+                    installPrompt.classList.add('hidden');
+                });
+            }
         }
     });
+    
+    // Global debug functions for development
+    window.debugAddMoney = (amount = 10000) => {
+        if (window.game) {
+            window.game.gameState.money += amount;
+            window.game.updateGameUI();
+            console.log(`Added $${amount} to balance`);
+        }
+    };
+    
+    window.debugCompleteProject = () => {
+        if (window.game && window.game.gameState.activeProjects.length > 0) {
+            const project = window.game.gameState.activeProjects[0];
+            project.timeRemaining = 0;
+            console.log('Project completion forced');
+        }
+    };
+    
+    window.debugShowCreation = () => {
+        if (window.game) {
+            document.getElementById('game-container').classList.add('hidden');
+            document.getElementById('company-creation').classList.remove('hidden');
+        }
+    };
+    
+    console.log('✅ Game initialized successfully!');
+    console.log('🎮 Debug functions available: debugAddMoney(), debugCompleteProject(), debugShowCreation()');
 });
 
-// PWA offline detection
-window.addEventListener('online', () => {
-    if (window.game) {
-        window.game.showNotification("Back online!", "success");
-    }
-});
+// ===============================
+// SERVICE WORKER REGISTRATION
+// ===============================
 
-window.addEventListener('offline', () => {
-    if (window.game) {
-        window.game.showNotification("Playing offline", "info");
-    }
-});
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+        try {
+            const registration = await navigator.serviceWorker.register('./sw.js');
+            console.log('✅ Service Worker registered:', registration.scope);
+            
+            // Handle updates
+            registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                newWorker.addEventListener('statechange', () => {
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        if (window.game) {
+                            window.game.showNotification('New version available! Refresh to update.', 'info');
+                        }
+                    }
+                });
+            });
+        } catch (error) {
+            console.error('❌ Service Worker registration failed:', error);
+        }
+    });
+}
+
+console.log('✅ Software Tycoon v2.1.0 script loaded successfully!');

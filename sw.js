@@ -1,337 +1,604 @@
-// Software Tycoon - Service Worker
-// Author: AI Assistant | Date: August 30, 2025
-// Provides offline functionality, caching, and app-like behavior
+// Software Tycoon v2.1.0 - Enhanced Service Worker
+// Developer: AL Software Studio | Last Updated: 30 August, 2025
+// 🚀 Modern PWA with offline gaming, background sync, and push notifications
 
-const CACHE_NAME = 'software-tycoon-v1.0.0';
-const CACHE_VERSION = '1.0.0';
+const CACHE_NAME = 'software-tycoon-v2.1.0';
+const OFFLINE_URL = './offline.html';
+const FALLBACK_IMAGE = 'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png';
 
-// Files to cache for offline functionality
-const STATIC_CACHE_URLS = [
-    '/',
-    '/index.html',
-    '/script.js',
-    '/styles.css',
-    '/manifest.json',
-    'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png'
+// Cache configuration with versioning
+const CACHE_CONFIG = {
+    version: '2.1.0',
+    staticCacheName: `${CACHE_NAME}-static`,
+    dynamicCacheName: `${CACHE_NAME}-dynamic`,
+    gameDataCacheName: `${CACHE_NAME}-gamedata`,
+    imageCacheName: `${CACHE_NAME}-images`
+};
+
+// Assets to cache for offline functionality
+const STATIC_ASSETS = [
+    './',
+    './index.html',
+    './styles.css',
+    './script.js',
+    './manifest.json',
+    './offline.html',
+    
+    // External resources
+    'https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500;700&display=swap',
+    'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png',
+    
+    // Font files (will be cached dynamically)
+    'https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2',
+    'https://fonts.gstatic.com/s/roboto/v30/KFOlCnqEu92Fr1MmEU9fBBc4.woff2',
+    'https://fonts.gstatic.com/s/robotomono/v22/L0xuDF4xlVMF-BfR8bXMIhJHg45mwgGEFl0_3vq_ROW-AJi8SJQt.woff2'
 ];
 
-// Dynamic cache for game saves and user data
-const DYNAMIC_CACHE_NAME = 'software-tycoon-dynamic-v1.0.0';
-const MAX_DYNAMIC_CACHE_SIZE = 50;
+// Cache strategies for different resource types
+const CACHE_STRATEGIES = {
+    static: 'cache-first',           // HTML, CSS, JS, Images
+    api: 'network-first',            // API calls, dynamic data
+    fonts: 'cache-first',            // Font files
+    images: 'cache-first',           // Game assets, logos
+    gameData: 'cache-first'          // Save files, game state
+};
 
-// Install Event - Cache static resources
-self.addEventListener('install', (event) => {
-    console.log('[SW] Installing Service Worker...');
+// Network timeout settings
+const NETWORK_TIMEOUT = 5000;
+
+// ===============================
+// SERVICE WORKER INSTALLATION
+// ===============================
+
+self.addEventListener('install', event => {
+    console.log('🚀 Software Tycoon v2.1.0 Service Worker installing...');
     
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                console.log('[SW] Caching static files...');
-                return cache.addAll(STATIC_CACHE_URLS);
-            })
-            .then(() => {
-                console.log('[SW] Static files cached successfully');
-                return self.skipWaiting();
-            })
-            .catch((error) => {
-                console.error('[SW] Failed to cache static files:', error);
-            })
+        Promise.all([
+            // Pre-cache static assets
+            caches.open(CACHE_CONFIG.staticCacheName)
+                .then(cache => {
+                    console.log('📦 Pre-caching static assets...');
+                    return cache.addAll(STATIC_ASSETS);
+                })
+                .catch(error => {
+                    console.error('❌ Failed to cache static assets:', error);
+                    // Don't fail installation if some assets can't be cached
+                    return Promise.resolve();
+                }),
+            
+            // Initialize other caches
+            caches.open(CACHE_CONFIG.dynamicCacheName),
+            caches.open(CACHE_CONFIG.gameDataCacheName),
+            caches.open(CACHE_CONFIG.imageCacheName),
+            
+            // Skip waiting to activate immediately
+            self.skipWaiting()
+        ])
     );
 });
 
-// Activate Event - Clean up old caches
-self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating Service Worker...');
+// ===============================
+// SERVICE WORKER ACTIVATION
+// ===============================
+
+self.addEventListener('activate', event => {
+    console.log('⚡ Software Tycoon v2.1.0 Service Worker activating...');
     
     event.waitUntil(
-        caches.keys()
-            .then((cacheNames) => {
-                return Promise.all(
-                    cacheNames
-                        .filter((cacheName) => {
-                            // Remove old versions of cache
-                            return cacheName !== CACHE_NAME && 
-                                   cacheName !== DYNAMIC_CACHE_NAME &&
-                                   cacheName.startsWith('software-tycoon-');
-                        })
-                        .map((cacheName) => {
-                            console.log('[SW] Deleting old cache:', cacheName);
-                            return caches.delete(cacheName);
-                        })
-                );
-            })
-            .then(() => {
-                console.log('[SW] Service Worker activated');
-                return self.clients.claim();
-            })
-            .catch((error) => {
-                console.error('[SW] Activation failed:', error);
-            })
+        Promise.all([
+            // Clean up old caches
+            cleanupOldCaches(),
+            
+            // Take control of all pages
+            self.clients.claim(),
+            
+            // Initialize background sync
+            registerBackgroundSync(),
+            
+            // Set up periodic sync if available
+            registerPeriodicSync()
+        ])
     );
 });
 
-// Fetch Event - Handle network requests
-self.addEventListener('fetch', (event) => {
-    const request = event.request;
-    const url = new URL(request.url);
-    
-    // Skip non-GET requests
-    if (request.method !== 'GET') {
-        return;
-    }
-    
-    // Skip chrome-extension and other non-http requests
-    if (!request.url.startsWith('http')) {
-        return;
-    }
-    
-    // Handle different types of requests
-    if (STATIC_CACHE_URLS.includes(request.url) || 
-        STATIC_CACHE_URLS.includes(url.pathname)) {
-        // Static files - Cache First Strategy
-        event.respondWith(cacheFirstStrategy(request));
-    } else if (url.origin === location.origin) {
-        // Same origin requests - Network First Strategy
-        event.respondWith(networkFirstStrategy(request));
-    } else {
-        // External resources - Stale While Revalidate Strategy
-        event.respondWith(staleWhileRevalidateStrategy(request));
-    }
-});
+// ===============================
+// CACHE MANAGEMENT
+// ===============================
 
-// Cache First Strategy - For static assets
-async function cacheFirstStrategy(request) {
+async function cleanupOldCaches() {
     try {
-        const cache = await caches.open(CACHE_NAME);
-        const cachedResponse = await cache.match(request);
+        const cacheNames = await caches.keys();
+        const currentCaches = Object.values(CACHE_CONFIG);
         
-        if (cachedResponse) {
-            console.log('[SW] Serving from cache:', request.url);
-            return cachedResponse;
-        }
-        
-        console.log('[SW] Not in cache, fetching:', request.url);
-        const networkResponse = await fetch(request);
-        
-        if (networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
-        }
-        
-        return networkResponse;
-    } catch (error) {
-        console.error('[SW] Cache First failed:', error);
-        return getCachedFallback(request);
-    }
-}
-
-// Network First Strategy - For dynamic content
-async function networkFirstStrategy(request) {
-    try {
-        console.log('[SW] Network First for:', request.url);
-        const networkResponse = await fetch(request);
-        
-        if (networkResponse.status === 200) {
-            const cache = await caches.open(DYNAMIC_CACHE_NAME);
-            cache.put(request, networkResponse.clone());
-            await limitCacheSize(DYNAMIC_CACHE_NAME, MAX_DYNAMIC_CACHE_SIZE);
-        }
-        
-        return networkResponse;
-    } catch (error) {
-        console.log('[SW] Network failed, trying cache:', request.url);
-        const cache = await caches.open(DYNAMIC_CACHE_NAME);
-        const cachedResponse = await cache.match(request);
-        
-        if (cachedResponse) {
-            return cachedResponse;
-        }
-        
-        return getCachedFallback(request);
-    }
-}
-
-// Stale While Revalidate Strategy - For external resources
-async function staleWhileRevalidateStrategy(request) {
-    const cache = await caches.open(DYNAMIC_CACHE_NAME);
-    const cachedResponse = await cache.match(request);
-    
-    // Fetch in background to update cache
-    const fetchPromise = fetch(request).then((networkResponse) => {
-        if (networkResponse.status === 200) {
-            cache.put(request, networkResponse.clone());
-            limitCacheSize(DYNAMIC_CACHE_NAME, MAX_DYNAMIC_CACHE_SIZE);
-        }
-        return networkResponse;
-    }).catch((error) => {
-        console.error('[SW] Background fetch failed:', error);
-    });
-    
-    // Return cached version immediately if available
-    if (cachedResponse) {
-        console.log('[SW] Serving stale content:', request.url);
-        return cachedResponse;
-    }
-    
-    // Wait for network if no cached version
-    try {
-        return await fetchPromise;
-    } catch (error) {
-        return getCachedFallback(request);
-    }
-}
-
-// Get fallback response for failed requests
-async function getCachedFallback(request) {
-    const url = new URL(request.url);
-    
-    // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-        const cache = await caches.open(CACHE_NAME);
-        const fallback = await cache.match('/index.html');
-        if (fallback) {
-            return fallback;
-        }
-    }
-    
-    // Return generic offline response
-    return new Response(
-        JSON.stringify({
-            error: 'Offline',
-            message: 'This content is not available offline'
-        }),
-        {
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: {
-                'Content-Type': 'application/json',
-                'Cache-Control': 'no-cache'
+        const deletionPromises = cacheNames.map(cacheName => {
+            if (!currentCaches.includes(cacheName) && cacheName.startsWith('software-tycoon-')) {
+                console.log('🗑️ Deleting old cache:', cacheName);
+                return caches.delete(cacheName);
             }
-        }
-    );
-}
-
-// Limit cache size to prevent storage bloat
-async function limitCacheSize(cacheName, maxSize) {
-    const cache = await caches.open(cacheName);
-    const keys = await cache.keys();
-    
-    if (keys.length > maxSize) {
-        console.log('[SW] Cache size limit exceeded, cleaning up...');
-        const keysToDelete = keys.slice(0, keys.length - maxSize);
+        }).filter(Boolean);
         
-        await Promise.all(
-            keysToDelete.map(key => cache.delete(key))
-        );
-        
-        console.log(`[SW] Deleted ${keysToDelete.length} old cache entries`);
+        await Promise.all(deletionPromises);
+        console.log('✅ Cache cleanup completed');
+    } catch (error) {
+        console.error('❌ Cache cleanup failed:', error);
     }
 }
 
-// Background Sync - For offline actions
-self.addEventListener('sync', (event) => {
-    console.log('[SW] Background sync triggered:', event.tag);
+// ===============================
+// FETCH HANDLER WITH SMART CACHING
+// ===============================
+
+self.addEventListener('fetch', event => {
+    const { request } = event;
+    const url = new URL(request.url);
     
-    if (event.tag === 'save-game-data') {
+    // Skip non-GET requests and non-HTTP(S) protocols
+    if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
+        return;
+    }
+    
+    // Skip Chrome extension requests
+    if (url.protocol === 'chrome-extension:' || url.protocol === 'moz-extension:') {
+        return;
+    }
+    
+    event.respondWith(handleRequest(request));
+});
+
+async function handleRequest(request) {
+    const url = new URL(request.url);
+    
+    try {
+        // Determine caching strategy based on request type
+        if (isStaticAsset(url)) {
+            return await cacheFirstStrategy(request, CACHE_CONFIG.staticCacheName);
+        }
+        
+        if (isFontRequest(url)) {
+            return await cacheFirstStrategy(request, CACHE_CONFIG.staticCacheName);
+        }
+        
+        if (isImageRequest(request)) {
+            return await cacheFirstStrategy(request, CACHE_CONFIG.imageCacheName);
+        }
+        
+        if (isGameDataRequest(url)) {
+            return await cacheFirstStrategy(request, CACHE_CONFIG.gameDataCacheName);
+        }
+        
+        if (isNavigationRequest(request)) {
+            return await networkFirstWithOfflineStrategy(request);
+        }
+        
+        if (isAPIRequest(url)) {
+            return await networkFirstStrategy(request, CACHE_CONFIG.dynamicCacheName);
+        }
+        
+        // Default: Network first with dynamic caching
+        return await networkFirstStrategy(request, CACHE_CONFIG.dynamicCacheName);
+        
+    } catch (error) {
+        console.error('🚨 Request handling error:', error);
+        return await getOfflineFallback(request);
+    }
+}
+
+// ===============================
+// CACHING STRATEGIES
+// ===============================
+
+async function cacheFirstStrategy(request, cacheName) {
+    try {
+        // Try cache first
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            // Update cache in background for future requests
+            updateCacheInBackground(request, cacheName);
+            return cachedResponse;
+        }
+        
+        // Fallback to network
+        return await fetchAndCache(request, cacheName);
+    } catch (error) {
+        console.error('Cache-first strategy failed:', error);
+        throw error;
+    }
+}
+
+async function networkFirstStrategy(request, cacheName, timeout = NETWORK_TIMEOUT) {
+    try {
+        // Try network first with timeout
+        const networkResponse = await Promise.race([
+            fetch(request),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Network timeout')), timeout)
+            )
+        ]);
+        
+        if (networkResponse.ok) {
+            // Cache successful response
+            await cacheResponse(request, networkResponse.clone(), cacheName);
+        }
+        
+        return networkResponse;
+    } catch (error) {
+        // Fallback to cache
+        const cachedResponse = await caches.match(request);
+        if (cachedResponse) {
+            console.log('📱 Serving from cache (network failed):', request.url);
+            return cachedResponse;
+        }
+        throw error;
+    }
+}
+
+async function networkFirstWithOfflineStrategy(request) {
+    try {
+        const networkResponse = await networkFirstStrategy(request, CACHE_CONFIG.dynamicCacheName);
+        return networkResponse;
+    } catch (error) {
+        // Return offline page for navigation requests
+        console.log('📴 Serving offline page for:', request.url);
+        const offlineResponse = await caches.match(OFFLINE_URL);
+        if (offlineResponse) {
+            return offlineResponse;
+        }
+        
+        // Final fallback
+        return new Response(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Software Tycoon - Offline</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <style>
+                    body { 
+                        font-family: 'Roboto', sans-serif; 
+                        background: #0a0a0a; 
+                        color: white; 
+                        text-align: center; 
+                        padding: 2rem;
+                        margin: 0;
+                    }
+                    h1 { color: #e94560; }
+                    .offline-icon { font-size: 4rem; margin: 2rem 0; }
+                </style>
+            </head>
+            <body>
+                <div class="offline-icon">📱</div>
+                <h1>Software Tycoon - Offline Mode</h1>
+                <p>You're currently offline, but your game data is safe!</p>
+                <p>Reconnect to the internet to sync your progress.</p>
+                <button onclick="window.location.reload()">Try Again</button>
+            </body>
+            </html>
+        `, {
+            status: 200,
+            statusText: 'OK',
+            headers: { 'Content-Type': 'text/html' }
+        });
+    }
+}
+
+// ===============================
+// CACHE UTILITIES
+// ===============================
+
+async function fetchAndCache(request, cacheName) {
+    try {
+        const response = await fetch(request);
+        
+        if (response.ok) {
+            await cacheResponse(request, response.clone(), cacheName);
+        }
+        
+        return response;
+    } catch (error) {
+        console.error('Fetch and cache failed:', error);
+        throw error;
+    }
+}
+
+async function cacheResponse(request, response, cacheName) {
+    try {
+        const cache = await caches.open(cacheName);
+        await cache.put(request, response);
+    } catch (error) {
+        console.error('Failed to cache response:', error);
+        // Don't throw - caching failure shouldn't break the request
+    }
+}
+
+async function updateCacheInBackground(request, cacheName) {
+    try {
+        const response = await fetch(request);
+        if (response.ok) {
+            await cacheResponse(request, response, cacheName);
+        }
+    } catch (error) {
+        // Silent fail for background updates
+        console.warn('Background cache update failed:', error);
+    }
+}
+
+async function getOfflineFallback(request) {
+    if (isImageRequest(request)) {
+        const fallbackImage = await caches.match(FALLBACK_IMAGE);
+        if (fallbackImage) {
+            return fallbackImage;
+        }
+        
+        // Return a minimal SVG placeholder
+        return new Response(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+                <rect width="200" height="200" fill="#0a0a0a"/>
+                <text x="100" y="100" text-anchor="middle" fill="#e94560" font-family="Arial" font-size="24">🚀</text>
+                <text x="100" y="130" text-anchor="middle" fill="#00d4ff" font-family="Arial" font-size="12">Offline</text>
+            </svg>
+        `, { headers: { 'Content-Type': 'image/svg+xml' } });
+    }
+    
+    if (isNavigationRequest(request)) {
+        return await caches.match(OFFLINE_URL) || 
+               await caches.match('./index.html');
+    }
+    
+    return new Response('Offline - Software Tycoon', { 
+        status: 503, 
+        statusText: 'Service Unavailable' 
+    });
+}
+
+// ===============================
+// REQUEST TYPE DETECTION
+// ===============================
+
+function isStaticAsset(url) {
+    const staticExtensions = ['.html', '.css', '.js', '.json', '.ico', '.webmanifest'];
+    return staticExtensions.some(ext => url.pathname.endsWith(ext)) ||
+           url.pathname === '/' ||
+           url.pathname === './';
+}
+
+function isFontRequest(url) {
+    return url.hostname.includes('fonts.g') ||
+           url.pathname.includes('.woff') ||
+           url.pathname.includes('.woff2') ||
+           url.pathname.includes('.ttf') ||
+           url.pathname.includes('roboto');
+}
+
+function isImageRequest(request) {
+    return request.destination === 'image' ||
+           request.url.includes('.png') ||
+           request.url.includes('.jpg') ||
+           request.url.includes('.jpeg') ||
+           request.url.includes('.gif') ||
+           request.url.includes('.svg') ||
+           request.url.includes('.webp');
+}
+
+function isGameDataRequest(url) {
+    return url.pathname.includes('gamedata') ||
+           url.pathname.includes('save') ||
+           url.pathname.includes('settings') ||
+           url.searchParams.has('game') ||
+           url.searchParams.has('save');
+}
+
+function isNavigationRequest(request) {
+    return request.mode === 'navigate';
+}
+
+function isAPIRequest(url) {
+    return url.pathname.includes('/api/') ||
+           url.pathname.includes('.json') ||
+           (url.hostname !== self.location.hostname && 
+            !url.hostname.includes('fonts.') && 
+            !url.hostname.includes('postimg.cc'));
+}
+
+// ===============================
+// BACKGROUND SYNC
+// ===============================
+
+async function registerBackgroundSync() {
+    try {
+        if ('sync' in self.registration) {
+            await self.registration.sync.register('background-sync');
+            console.log('✅ Background sync registered');
+        }
+    } catch (error) {
+        console.warn('⚠️ Background sync registration failed:', error);
+    }
+}
+
+self.addEventListener('sync', event => {
+    console.log('🔄 Background sync triggered:', event.tag);
+    
+    if (event.tag === 'background-sync') {
         event.waitUntil(syncGameData());
-    } else if (event.tag === 'sync-achievements') {
-        event.waitUntil(syncAchievements());
+    }
+    
+    if (event.tag === 'game-save-sync') {
+        event.waitUntil(syncGameSaves());
     }
 });
 
-// Sync game data when back online
 async function syncGameData() {
     try {
-        console.log('[SW] Syncing game data...');
+        console.log('🎮 Syncing game data in background...');
         
-        // Get pending saves from IndexedDB or localStorage
-        const gameData = localStorage.getItem('softwareTycoonSave');
+        // Get pending game data from IndexedDB or localStorage
+        const pendingData = await getPendingGameData();
         
-        if (gameData) {
-            // Could sync to cloud service here
-            console.log('[SW] Game data synced successfully');
+        if (pendingData && pendingData.length > 0) {
+            // Process each pending item
+            for (const data of pendingData) {
+                await processPendingGameData(data);
+            }
             
-            // Notify main app
-            const clients = await self.clients.matchAll();
-            clients.forEach(client => {
-                client.postMessage({
-                    type: 'GAME_DATA_SYNCED',
-                    data: { success: true }
-                });
-            });
+            // Clear processed data
+            await clearPendingGameData();
+            
+            console.log('✅ Game data sync completed');
         }
     } catch (error) {
-        console.error('[SW] Failed to sync game data:', error);
+        console.error('❌ Background game sync failed:', error);
     }
 }
 
-// Sync achievements
-async function syncAchievements() {
+async function syncGameSaves() {
     try {
-        console.log('[SW] Syncing achievements...');
-        // Achievement sync logic here
-        console.log('[SW] Achievements synced successfully');
+        console.log('💾 Syncing game saves...');
+        // Implement game save synchronization logic
+        // This could sync with cloud storage or backup servers
     } catch (error) {
-        console.error('[SW] Failed to sync achievements:', error);
+        console.error('❌ Game save sync failed:', error);
     }
 }
 
-// Push Notifications - For game updates and achievements
-self.addEventListener('push', (event) => {
-    const data = event.data ? event.data.json() : {};
+// ===============================
+// PERIODIC BACKGROUND SYNC
+// ===============================
+
+async function registerPeriodicSync() {
+    try {
+        if ('periodicSync' in self.registration) {
+            await self.registration.periodicSync.register('game-stats-sync', {
+                minInterval: 24 * 60 * 60 * 1000, // 24 hours
+            });
+            console.log('✅ Periodic sync registered');
+        }
+    } catch (error) {
+        console.warn('⚠️ Periodic sync registration failed:', error);
+    }
+}
+
+self.addEventListener('periodicsync', event => {
+    console.log('⏰ Periodic sync triggered:', event.tag);
+    
+    if (event.tag === 'game-stats-sync') {
+        event.waitUntil(syncGameStats());
+    }
+});
+
+async function syncGameStats() {
+    try {
+        console.log('📊 Syncing game statistics...');
+        // Implement periodic game stats synchronization
+        // This could update leaderboards, achievements, etc.
+    } catch (error) {
+        console.error('❌ Periodic stats sync failed:', error);
+    }
+}
+
+// ===============================
+// PUSH NOTIFICATIONS
+// ===============================
+
+self.addEventListener('push', event => {
+    console.log('📱 Push notification received');
     
     const options = {
-        title: data.title || 'Software Tycoon',
-        body: data.body || 'Check out your software empire!',
-        icon: 'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png',
-        badge: 'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png',
-        data: data.data || {},
+        body: 'Your software company needs attention!',
+        icon: FALLBACK_IMAGE,
+        badge: FALLBACK_IMAGE,
+        vibrate: [200, 100, 200],
+        tag: 'software-tycoon',
+        requireInteraction: false,
+        silent: false,
         actions: [
             {
-                action: 'open',
+                action: 'open-game',
                 title: 'Open Game',
-                icon: 'https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png'
+                icon: FALLBACK_IMAGE
             },
             {
                 action: 'dismiss',
                 title: 'Dismiss'
             }
         ],
-        requireInteraction: false,
-        silent: false,
-        vibrate: [200, 100, 200]
+        data: {
+            url: './',
+            timestamp: Date.now(),
+            gameVersion: CACHE_CONFIG.version
+        }
     };
     
+    let title = 'Software Tycoon';
+    let body = options.body;
+    
+    // Parse push payload if available
+    if (event.data) {
+        try {
+            const payload = event.data.json();
+            title = payload.title || title;
+            body = payload.body || body;
+            
+            // Gaming-specific notification types
+            if (payload.type === 'project-complete') {
+                body = `🎉 Project "${payload.project}" completed! Earned $${payload.revenue}`;
+                options.requireInteraction = true;
+            } else if (payload.type === 'achievement') {
+                body = `🏆 Achievement unlocked: ${payload.achievement}`;
+                options.requireInteraction = true;
+            } else if (payload.type === 'market-event') {
+                body = `📈 Market update: ${payload.message}`;
+            } else if (payload.type === 'milestone') {
+                body = `🎯 Milestone reached: ${payload.milestone}`;
+                options.requireInteraction = true;
+            }
+        } catch (error) {
+            console.error('Failed to parse push payload:', error);
+        }
+    }
+    
     event.waitUntil(
-        self.registration.showNotification(data.title || 'Software Tycoon', options)
+        self.registration.showNotification(title, {
+            ...options,
+            body: body
+        })
     );
 });
 
-// Handle notification clicks
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', event => {
+    console.log('🎯 Notification clicked:', event.action);
+    
     event.notification.close();
     
-    if (event.action === 'open' || !event.action) {
+    const action = event.action;
+    const notificationData = event.notification.data || {};
+    
+    if (action === 'open-game' || !action) {
         event.waitUntil(
-            clients.matchAll({ type: 'window' }).then((clientList) => {
-                // Focus existing window if available
+            clients.matchAll({ type: 'window' }).then(clientList => {
+                // Check if game is already open
                 for (const client of clientList) {
-                    if (client.url === '/' && 'focus' in client) {
+                    if (client.url.includes(self.location.origin) && 'focus' in client) {
                         return client.focus();
                     }
                 }
                 
-                // Open new window if no existing window
+                // Open new window if game not open
                 if (clients.openWindow) {
-                    return clients.openWindow('/');
+                    return clients.openWindow(notificationData.url || './');
                 }
             })
         );
     }
+    // 'dismiss' action doesn't need handling - notification is already closed
 });
 
-// Message handling from main app
-self.addEventListener('message', (event) => {
-    const { type, data } = event.data;
+// ===============================
+// MESSAGE HANDLING
+// ===============================
+
+self.addEventListener('message', event => {
+    const { type, data } = event.data || {};
+    
+    console.log('📨 Message received:', type);
     
     switch (type) {
         case 'SKIP_WAITING':
@@ -339,91 +606,170 @@ self.addEventListener('message', (event) => {
             break;
             
         case 'GET_VERSION':
-            event.ports[0].postMessage({ version: CACHE_VERSION });
+            if (event.ports && event.ports[0]) {
+                event.ports[0].postMessage({ 
+                    version: CACHE_CONFIG.version,
+                    caches: Object.keys(CACHE_CONFIG)
+                });
+            }
+            break;
+            
+        case 'CACHE_GAME_DATA':
+            event.waitUntil(cacheGameData(data));
+            break;
+            
+        case 'SYNC_REQUEST':
+            event.waitUntil(
+                self.registration.sync?.register(data.tag || 'background-sync')
+            );
             break;
             
         case 'CLEAR_CACHE':
-            clearAllCaches().then(() => {
-                event.ports[0].postMessage({ success: true });
-            });
+            event.waitUntil(clearSpecificCache(data.cacheName));
             break;
             
-        case 'FORCE_UPDATE':
-            forceUpdate().then(() => {
-                event.ports[0].postMessage({ success: true });
-            });
+        case 'GET_CACHE_SIZE':
+            event.waitUntil(getCacheSize().then(size => {
+                if (event.ports && event.ports[0]) {
+                    event.ports[0].postMessage({ cacheSize: size });
+                }
+            }));
             break;
             
         default:
-            console.log('[SW] Unknown message type:', type);
+            console.log('📨 Unknown message type:', type);
     }
 });
 
-// Clear all caches
-async function clearAllCaches() {
-    try {
-        const cacheNames = await caches.keys();
-        await Promise.all(
-            cacheNames.map(cacheName => caches.delete(cacheName))
-        );
-        console.log('[SW] All caches cleared');
-    } catch (error) {
-        console.error('[SW] Failed to clear caches:', error);
-    }
-}
+// ===============================
+// GAME-SPECIFIC HELPER FUNCTIONS
+// ===============================
 
-// Force update by clearing cache and reloading
-async function forceUpdate() {
+async function cacheGameData(data) {
     try {
-        await clearAllCaches();
-        
-        const clients = await self.clients.matchAll();
-        clients.forEach(client => {
-            client.postMessage({ type: 'RELOAD_APP' });
+        const cache = await caches.open(CACHE_CONFIG.gameDataCacheName);
+        const response = new Response(JSON.stringify(data), {
+            headers: { 
+                'Content-Type': 'application/json',
+                'Cache-Control': 'max-age=86400' // 24 hours
+            }
         });
-        
-        console.log('[SW] Force update completed');
+        await cache.put('/cached-game-data', response);
+        console.log('✅ Game data cached successfully');
     } catch (error) {
-        console.error('[SW] Force update failed:', error);
+        console.error('❌ Failed to cache game data:', error);
     }
 }
 
-// Periodic Background Sync (if supported)
-self.addEventListener('periodicsync', (event) => {
-    if (event.tag === 'game-backup') {
-        event.waitUntil(performGameBackup());
-    }
-});
+async function getPendingGameData() {
+    // This would typically interact with IndexedDB
+    // For now, return empty array
+    return [];
+}
 
-// Perform periodic game backup
-async function performGameBackup() {
+async function processPendingGameData(data) {
+    // Process individual pending game data items
+    console.log('Processing pending game data:', data);
+}
+
+async function clearPendingGameData() {
+    // Clear processed pending data
+    console.log('Clearing pending game data');
+}
+
+async function clearSpecificCache(cacheName) {
     try {
-        console.log('[SW] Performing periodic game backup...');
-        
-        // Backup logic here - could save to cloud storage
-        const gameData = localStorage.getItem('softwareTycoonSave');
-        
-        if (gameData) {
-            // Could implement cloud backup here
-            console.log('[SW] Game backup completed');
+        if (cacheName && await caches.has(cacheName)) {
+            await caches.delete(cacheName);
+            console.log('✅ Cache cleared:', cacheName);
         }
     } catch (error) {
-        console.error('[SW] Periodic backup failed:', error);
+        console.error('❌ Failed to clear cache:', error);
     }
 }
 
-// Error handling
-self.addEventListener('error', (event) => {
-    console.error('[SW] Service Worker error:', event.error);
+async function getCacheSize() {
+    try {
+        const cacheNames = await caches.keys();
+        let totalSize = 0;
+        
+        for (const cacheName of cacheNames) {
+            if (cacheName.startsWith('software-tycoon-')) {
+                const cache = await caches.open(cacheName);
+                const keys = await cache.keys();
+                
+                for (const request of keys) {
+                    const response = await cache.match(request);
+                    if (response) {
+                        const blob = await response.blob();
+                        totalSize += blob.size;
+                    }
+                }
+            }
+        }
+        
+        return totalSize;
+    } catch (error) {
+        console.error('❌ Failed to calculate cache size:', error);
+        return 0;
+    }
+}
+
+// ===============================
+// ERROR HANDLING
+// ===============================
+
+self.addEventListener('error', event => {
+    console.error('🚨 Service Worker error:', event.error);
+    
+    // Report error to analytics service if available
+    if (self.ga) {
+        self.ga('send', 'exception', {
+            exDescription: event.error.message,
+            exFatal: false
+        });
+    }
 });
 
-self.addEventListener('unhandledrejection', (event) => {
-    console.error('[SW] Unhandled promise rejection:', event.reason);
+self.addEventListener('unhandledrejection', event => {
+    console.error('🚨 Unhandled promise rejection:', event.reason);
+    
+    // Prevent the default browser behavior
+    event.preventDefault();
 });
 
-// Cleanup on unload
-self.addEventListener('beforeunload', () => {
-    console.log('[SW] Service Worker unloading...');
+// ===============================
+// INSTALLATION & UPDATE HANDLING
+// ===============================
+
+self.addEventListener('install', event => {
+    // Show install progress to user if possible
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'SW_INSTALL_PROGRESS',
+                progress: 0
+            });
+        });
+    });
 });
 
-console.log('[SW] Software Tycoon Service Worker loaded successfully');
+// Notify clients about updates
+self.addEventListener('activate', event => {
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'SW_ACTIVATED',
+                version: CACHE_CONFIG.version
+            });
+        });
+    });
+});
+
+// ===============================
+// SERVICE WORKER READY
+// ===============================
+
+console.log('✅ Software Tycoon v2.1.0 Service Worker loaded successfully!');
+console.log('🎮 Features: Offline Gaming, Background Sync, Push Notifications, Smart Caching');
+console.log('🚀 Cache Strategy: Static (cache-first), Dynamic (network-first), Game Data (cache-first)');
