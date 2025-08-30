@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Tycoon</title>
+    <meta name="description" content="Build your software empire from garage to global tech giant">
+    <meta name="theme-color" content="#1a1a2e">
+    
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Software Tycoon">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Software Tycoon" class="loading-logo">
+        <div class="loading-text">Loading Software Tycoon...</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="game-container" class="game-container hidden">
+        <!-- Header -->
+        <header class="game-header">
+            <div class="header-left">
+                <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Logo" class="logo">
+                <h1>Software Tycoon</h1>
+            </div>
+            <div class="header-right">
+                <div class="money-display">
+                    <span class="money-icon">💰</span>
+                    <span id="money-amount">$100,000</span>
+                </div>
+                <div class="reputation-display">
+                    <span class="rep-icon">⭐</span>
+                    <span id="reputation-amount">0</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="game-main">
+            <!-- Left Panel - Stats & Info -->
+            <aside class="left-panel">
+                <!-- Player Info -->
+                <section class="player-info">
+                    <h3>Your Empire</h3>
+                    <div class="stat-item">
+                        <span class="stat-label">Company:</span>
+                        <span id="company-name">Garage Soft</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Workplace:</span>
+                        <span id="workplace-level">Garage</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Employees:</span>
+                        <span id="employee-count">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Projects:</span>
+                        <span id="project-count">0</span>
+                    </div>
+                </section>
+
+                <!-- Skills -->
+                <section class="skills-section">
+                    <h3>Skills</h3>
+                    <div class="skill-item">
+                        <span class="skill-name">Coding</span>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="coding-skill" style="width: 20%"></div>
+                        </div>
+                        <span class="skill-level" id="coding-level">1</span>
+                    </div>
+                    <div class="skill-item">
+                        <span class="skill-name">Marketing</span>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="marketing-skill" style="width: 10%"></div>
+                        </div>
+                        <span class="skill-level" id="marketing-level">1</span>
+                    </div>
+                    <div class="skill-item">
+                        <span class="skill-name">Design</span>
+                        <div class="skill-bar">
+                            <div class="skill-progress" id="design-skill" style="width: 10%"></div>
+                        </div>
+                        <span class="skill-level" id="design-level">1</span>
+                    </div>
+                </section>
+
+                <!-- Hardware -->
+                <section class="hardware-section">
+                    <h3>Hardware</h3>
+                    <div class="hardware-item">
+                        <span class="hardware-icon">💻</span>
+                        <span id="hardware-type">Old PC</span>
+                        <button id="upgrade-hardware-btn" class="upgrade-btn">Upgrade ($5,000)</button>
+                    </div>
+                </section>
+            </aside>
+
+            <!-- Center Panel - Main Actions -->
+            <section class="center-panel">
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="develop-software-btn" class="action-btn primary">
+                        <span class="btn-icon">💻</span>
+                        <span class="btn-text">Develop Software</span>
+                        <span class="btn-cost">Free</span>
+                    </button>
+                    <button id="upgrade-workplace-btn" class="action-btn">
+                        <span class="btn-icon">🏢</span>
+                        <span class="btn-text">Upgrade Workplace</span>
+                        <span class="btn-cost">$10,000</span>
+                    </button>
+                    <button id="hire-employee-btn" class="action-btn">
+                        <span class="btn-icon">👥</span>
+                        <span class="btn-text">Hire Employee</span>
+                        <span class="btn-cost">$2,000</span>
+                    </button>
+                    <button id="marketing-campaign-btn" class="action-btn">
+                        <span class="btn-icon">📈</span>
+                        <span class="btn-text">Marketing Campaign</span>
+                        <span class="btn-cost">$1,000</span>
+                    </button>
+                </div>
+
+                <!-- Projects List -->
+                <section class="projects-section">
+                    <h3>Active Projects</h3>
+                    <div id="projects-list" class="projects-list">
+                        <div class="no-projects">No active projects. Start developing!</div>
+                    </div>
+                </section>
+
+                <!-- Mini Game Area -->
+                <section id="mini-game-area" class="mini-game-area hidden">
+                    <h3 id="mini-game-title">Debug Challenge</h3>
+                    <div id="mini-game-content" class="mini-game-content">
+                        <!-- Mini-game content will be loaded here -->
+                    </div>
+                </section>
+            </section>
+
+            <!-- Right Panel - Competition & Stats -->
+            <aside class="right-panel">
+                <!-- Competition -->
+                <section class="competition-section">
+                    <h3>Global Leaderboard</h3>
+                    <div class="leaderboard">
+                        <div class="leaderboard-item">
+                            <span class="rank">1.</span>
+                            <span class="company">TechGiant Corp</span>
+                            <span class="value">$50M</span>
+                        </div>
+                        <div class="leaderboard-item">
+                            <span class="rank">2.</span>
+                            <span class="company">InnovateSoft</span>
+                            <span class="value">$35M</span>
+                        </div>
+                        <div class="leaderboard-item">
+                            <span class="rank">3.</span>
+                            <span class="company">CodeMasters</span>
+                            <span class="value">$28M</span>
+                        </div>
+                        <div class="leaderboard-item player-rank">
+                            <span class="rank" id="player-rank">999.</span>
+                            <span class="company" id="player-company">Garage Soft</span>
+                            <span class="value" id="player-worth">$1K</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Market Trends -->
+                <section class="market-section">
+                    <h3>Market Trends</h3>
+                    <div class="trend-item">
+                        <span class="trend-name">Mobile Apps</span>
+                        <span class="trend-value hot">🔥 Hot</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-name">AI Tools</span>
+                        <span class="trend-value rising">📈 Rising</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-name">VR Games</span>
+                        <span class="trend-value stable">➡️ Stable</span>
+                    </div>
+                    <div class="trend-item">
+                        <span class="trend-name">Security Tools</span>
+                        <span class="trend-value declining">📉 Declining</span>
+                    </div>
+                </section>
+
+                <!-- Achievements -->
+                <section class="achievements-section">
+                    <h3>Achievements</h3>
+                    <div id="achievements-list" class="achievements-list">
+                        <div class="achievement-item locked">
+                            <span class="achievement-icon">🏆</span>
+                            <span class="achievement-name">First Million</span>
+                        </div>
+                        <div class="achievement-item locked">
+                            <span class="achievement-icon">🎯</span>
+                            <span class="achievement-name">App Store Hit</span>
+                        </div>
+                        <div class="achievement-item locked">
+                            <span class="achievement-icon">👑</span>
+                            <span class="achievement-name">Tech Empire</span>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </main>
+
+        <!-- Bottom Panel - Quick Stats & Actions -->
+        <footer class="game-footer">
+            <div class="quick-stats">
+                <div class="quick-stat">
+                    <span class="stat-label">Passive Income:</span>
+                    <span id="passive-income">$0/min</span>
+                </div>
+                <div class="quick-stat">
+                    <span class="stat-label">Total Revenue:</span>
+                    <span id="total-revenue">$0</span>
+                </div>
+                <div class="quick-stat">
+                    <span class="stat-label">Success Rate:</span>
+                    <span id="success-rate">0%</span>
+                </div>
+            </div>
+            <div class="footer-actions">
+                <button id="save-game-btn" class="footer-btn">💾 Save</button>
+                <button id="reset-game-btn" class="footer-btn">🔄 Reset</button>
+                <button id="settings-btn" class="footer-btn">⚙️ Settings</button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <!-- Software Development Modal -->
+    <div id="software-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Develop New Software</h3>
+                <button class="close-btn" id="close-software-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="software-type-selection">
+                    <h4>Choose Software Type:</h4>
+                    <div class="type-buttons">
+                        <button class="type-btn" data-type="app">
+                            <span class="type-icon">📱</span>
+                            <span>Mobile App</span>
+                            <small>Quick development, broad market</small>
+                        </button>
+                        <button class="type-btn" data-type="game">
+                            <span class="type-icon">🎮</span>
+                            <span>Game</span>
+                            <small>High profit potential, risky</small>
+                        </button>
+                        <button class="type-btn" data-type="tool">
+                            <span class="type-icon">🔧</span>
+                            <span>Utility Tool</span>
+                            <small>Steady income, business market</small>
+                        </button>
+                        <button class="type-btn locked" data-type="os">
+                            <span class="type-icon">🖥️</span>
+                            <span>Operating System</span>
+                            <small>Requires Corporate HQ</small>
+                        </button>
+                    </div>
+                </div>
+                <div class="software-customization hidden" id="software-customization">
+                    <div class="input-group">
+                        <label for="software-name">Software Name:</label>
+                        <input type="text" id="software-name" placeholder="My Awesome App">
+                    </div>
+                    <div class="input-group">
+                        <label for="software-features">Features (affects quality):</label>
+                        <div class="feature-checkboxes">
+                            <label><input type="checkbox" value="ui"> Modern UI</label>
+                            <label><input type="checkbox" value="analytics"> Analytics</label>
+                            <label><input type="checkbox" value="cloud"> Cloud Sync</label>
+                            <label><input type="checkbox" value="ai"> AI Integration</label>
+                        </div>
+                    </div>
+                    <div class="development-cost">
+                        <span>Development Cost: $<span id="dev-cost">500</span></span>
+                        <span>Estimated Time: <span id="dev-time">2 hours</span></span>
+                    </div>
+                    <button id="start-development-btn" class="action-btn primary">Start Development</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Settings</h3>
+                <button class="close-btn" id="close-settings-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-item">
+                    <label for="company-name-input">Company Name:</label>
+                    <input type="text" id="company-name-input" value="Garage Soft">
+                </div>
+                <div class="setting-item">
+                    <label for="auto-save">Auto Save:</label>
+                    <input type="checkbox" id="auto-save" checked>
+                </div>
+                <div class="setting-item">
+                    <label for="sound-effects">Sound Effects:</label>
+                    <input type="checkbox" id="sound-effects" checked>
+                </div>
+                <div class="setting-item">
+                    <label for="notifications">Notifications:</label>
+                    <input type="checkbox" id="notifications" checked>
+                </div>
+                <button id="save-settings-btn" class="action-btn primary">Save Settings</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div id="notifications" class="notifications"></div>
+
+    <!-- Install Prompt -->
+    <div id="install-prompt" class="install-prompt hidden">
+        <div class="install-content">
+            <img src="https://i.postimg.cc/7ZCRTTL2/SOFTWARE.png" alt="Install" class="install-icon">
+            <div class="install-text">
+                <h4>Install Software Tycoon</h4>
+                <p>Add to your home screen for the best experience!</p>
+            </div>
+            <div class="install-actions">
+                <button id="install-btn" class="install-button">Install</button>
+                <button id="dismiss-install" class="dismiss-button">Maybe Later</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('install-prompt');
+        const installBtn = document.getElementById('install-btn');
+        const dismissInstall = document.getElementById('dismiss-install');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installPrompt.classList.add('hidden');
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        dismissInstall.addEventListener('click', () => {
+            installPrompt.classList.add('hidden');
+        });
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(registrationError => console.log('SW registration failed'));
+            });
+        }
+
+        // Loading Screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+                document.getElementById('game-container').classList.remove('hidden');
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
